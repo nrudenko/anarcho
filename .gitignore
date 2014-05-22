@@ -52,3 +52,8 @@ coverage.xml
 # Sphinx documentation
 docs/_build/
 
+.idea/
+flask/
+tmp/
+virtualenv-1.11.6/
+

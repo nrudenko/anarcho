@@ -3,15 +3,19 @@
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
 <div class=page>
     <div class=metanav>
-        {% if not session.logged_in %}
+        {% if not g.user %}
+        <a href="{{ url_for('register') }}">sign up</a> |
         <a href="{{ url_for('login') }}">log in</a>
         {% else %}
+        <a href="{{ url_for('guide') }}">guide</a>
         <a href="{{ url_for('logout') }}">log out</a>
+        <b>{{ g.user['username'] }}</b>
         {% endif %}
     </div>
     <div class=logo>
-        <img src="static/ico.png"/>
-        <h1>anarcho</h1>
+        <a href="/"><img src="static/ico.png"></a>
+        <br>
+        anarcho
     </div>
     {% for message in get_flashed_messages() %}
     <div class=flash>{{ message }}</div>

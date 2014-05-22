@@ -7,7 +7,7 @@
 
 .logo {
     text-align: center;
-    font-size: 25px;
+    font-size: 60pt;
     font-family: logo_font;
 }
 
@@ -77,17 +77,17 @@ h2 {
     border-radius: 5px;
 }
 
-.dropZone.hover {
+#dropZone.hover {
     background: #ddd;
     border-color: #aaa;
 }
 
-.dropZone.error {
+#dropZone.error {
     background: #faa;
     border-color: #f00;
 }
 
-.dropZone.drop {
+#dropZone.drop {
     background: #afa;
     border-color: #0f0;
 }
