@@ -4,12 +4,12 @@
 <div class=page>
     <div class=metanav>
         {% if not g.user %}
-        <a href="{{ url_for('register') }}">sign up</a> |
-        <a href="{{ url_for('login') }}">log in</a>
+            <a href="{{ url_for('register') }}">sign up</a> |
+            <a href="{{ url_for('login') }}">log in</a>
         {% else %}
-        <a href="{{ url_for('guide') }}">guide</a>
-        <a href="{{ url_for('logout') }}">log out</a>
-        <b>{{ g.user['username'] }}</b>
+            <a href="{{ url_for('guide') }}">guide</a>
+            <a href="{{ url_for('logout') }}">log out</a>
+            <b>{{ g.user['username'] }}</b>
         {% endif %}
     </div>
     <div class=logo>
@@ -18,7 +18,7 @@
         anarcho
     </div>
     {% for message in get_flashed_messages() %}
-    <div class=flash>{{ message }}</div>
+        <div class=flash>{{ message }}</div>
     {% endfor %}
     {% block body %}{% endblock %}
 </div>

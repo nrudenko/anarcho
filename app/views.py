@@ -1,88 +1,68 @@
 import time
 import subprocess
-from app.db_utils import get_db, query_db
+from app.database import db_session
+from flask.ext.login import login_user, login_required, logout_user
 import os
-from app import app
+from app import app, login_manager
+from app.model.user import User
 from flask import request, session, redirect, url_for, render_template, flash, g
 import re
-from werkzeug.security import generate_password_hash, check_password_hash
+
+
+@login_manager.user_loader
+def load_user(id):
+    return User.query.filter_by(id=id).first()
 
 
 @app.before_request
 def before_request():
-    g.user = None
-    if 'user_id' in session:
-        g.user = query_db('select * from user where user_id = ?',
-                          [session['user_id']], one=True)
-
-
-def get_user_id(username):
-    """Convenience method to look up the id for a username."""
-    rv = query_db('select user_id from user where username = ?',
-                  [username], one=True)
-    return rv[1] if rv else None
-
-
-@app.route('/')
-@app.route('/index')
-def index():
-    return render_template('index.html')
-
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    """Logs the user in."""
-    if g.user:
-        return redirect(url_for('index'))
-    error = None
-    if request.method == 'POST':
-        user = query_db('''select * from user where username = ?''', [request.form['username']], one=True)
-        if user is None:
-            error = 'Invalid username'
-        elif not check_password_hash(user['pw_hash'], request.form['password']):
-            error = 'Invalid password'
-        else:
-            session['user_id'] = user['user_id']
-            return redirect(url_for('index'))
-    return render_template('login.html', error=error)
+    g.user = User.query.filter_by(id=session['user_id']).first()
 
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    """Registers the user."""
-    if g.user:
+    if request.method == 'GET':
+        return render_template('register.html')
+    user = User(request.form['username'], request.form['password'], request.form['email'])
+    db_session.add(user)
+    db_session.commit()
+    return redirect(url_for('login'))
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if g.user is not None and g.user.is_authenticated():
         return redirect(url_for('index'))
-    error = None
-    if request.method == 'POST':
-        if not request.form['username']:
-            error = 'You have to enter a username'
-        elif not request.form['email'] or \
-                        '@' not in request.form['email']:
-            error = 'You have to enter a valid email address'
-        elif not request.form['password']:
-            error = 'You have to enter a password'
-        elif request.form['password'] != request.form['password2']:
-            error = 'The two passwords do not match'
-        elif get_user_id(request.form['username']) is not None:
-            error = 'The username is already taken'
-        else:
-            db = get_db()
-            db.execute('''insert into user (
-              username, email, pw_hash) values (?, ?, ?)''',
-                       [request.form['username'], request.form['email'],
-                        generate_password_hash(request.form['password'])])
-            db.commit()
-            return redirect(url_for('login'))
-    return render_template('register.html', error=error)
+    if request.method == 'GET':
+        return redirect(url_for('index'))
+    username = request.form['username']
+    password = request.form['password']
+    registered_user = User.query.filter_by(username=username, password=password).first()
+    if registered_user is None:
+        return redirect(url_for('login'))
+    login_user(registered_user)
+    return redirect(request.args.get('next') or url_for('index'))
+
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 
 @app.route('/logout')
 def logout():
-    session.pop('user_id', None)
+    logout_user()
     return redirect(url_for('index'))
 
 
+@app.route('/guide')
+@login_required
+def guide():
+    return render_template('guide.html')
+
+
 @app.route('/upload', methods=['POST'])
+@login_required
 def upload():
     folder = os.path.abspath(app.config['UPLOAD_FOLDER'])
 
@@ -107,13 +87,8 @@ def parse_apk(file_name, apk_path):
     package = match.group("name")
     version_code = match.group("versionCode")
     version_name = match.group("versionName")
-    db = get_db()
-    db.execute('''insert into build (
-              app_id, pub_date, version,release_notes ,url) values (?, ?, ?,?,?)''',
-               [file_name, file_name, version_code, package + ' ' + version_name, 'http://' + file_name])
-    db.commit()
-
-
-@app.route('/guide')
-def guide():
-    return render_template('guide.html')
+    # db = get_db()
+    # db.execute('''insert into build (
+    #           app_id, pub_date, version,release_notes ,url) values (?, ?, ?,?,?)''',
+    #            [file_name, file_name, version_code, package + ' ' + version_name, 'http://' + file_name])
+    # db.commit()

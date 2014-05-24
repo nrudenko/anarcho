@@ -2,19 +2,16 @@
 import os, subprocess
 
 subprocess.call(['virtualenv', 'flask'])
-# if sys.platform == 'win32':win32
-#     bin = 'Scripts'
-# else:
-#     bin = 'bin'
-subprocess.call([os.path.join('flask', 'bin', 'pip'), 'install', 'flask ', 'gunicorn'])
-# subprocess.call([os.path.join('flask', bin, 'pip'), 'install', 'flask-login'])
+
+subprocess.call([os.path.join('flask', 'bin', 'pip'), 'install', 'gunicorn'])
+subprocess.call([os.path.join('flask', 'bin', 'pip'), 'install', 'flask'])
+subprocess.call([os.path.join('flask', 'bin', 'pip'), 'install', 'flask-login'])
+
+subprocess.call([os.path.join('flask', 'bin', 'pip'), 'install', 'sqlalchemy'])
+subprocess.call([os.path.join('flask', 'bin', 'pip'), 'install', 'flask-sqlalchemy'])
+
 # subprocess.call([os.path.join('flask', bin, 'pip'), 'install', 'flask-openid'])
-# if sys.platform == 'win32':
-#     subprocess.call([os.path.join('flask', bin, 'pip'), 'install', '--no-deps', 'lamson', 'chardet', 'flask-mail'])
-# else:
-#     subprocess.call([os.path.join('flask', bin, 'pip'), 'install', 'flask-mail'])
-# subprocess.call([os.path.join('flask', bin, 'pip'), 'install', 'sqlalchemy==0.7.9'])
-# subprocess.call([os.path.join('flask', bin, 'pip'), 'install', 'flask-sqlalchemy'])
+#subprocess.call([os.path.join('flask', bin, 'pip'), 'install', 'flask-mail'])
 # subprocess.call([os.path.join('flask', bin, 'pip'), 'install', 'sqlalchemy-migrate'])
 # subprocess.call([os.path.join('flask', bin, 'pip'), 'install', 'flask-whooshalchemy'])
 # subprocess.call([os.path.join('flask', bin, 'pip'), 'install', 'flask-wtf'])
