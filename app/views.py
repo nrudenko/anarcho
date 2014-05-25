@@ -10,13 +10,16 @@ import re
 
 
 @login_manager.user_loader
-def load_user(id):
-    return User.query.filter_by(id=id).first()
+def load_user(user_id):
+    return User.query.filter_by(id=user_id).first()
 
 
 @app.before_request
 def before_request():
-    g.user = User.query.filter_by(id=session['user_id']).first()
+    g.user = None
+    if 'user_id' in session:
+        print(session['user_id'])
+        g.user = load_user(session['user_id'])
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -32,9 +35,10 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if g.user is not None and g.user.is_authenticated():
+        print g.user
         return redirect(url_for('index'))
     if request.method == 'GET':
-        return redirect(url_for('index'))
+        return render_template('login.html')
     username = request.form['username']
     password = request.form['password']
     registered_user = User.query.filter_by(username=username, password=password).first()
@@ -44,15 +48,15 @@ def login():
     return redirect(request.args.get('next') or url_for('index'))
 
 
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-
 @app.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('index'))
+
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 
 @app.route('/guide')
@@ -75,6 +79,12 @@ def upload():
     return redirect(url_for('index'))
 
 
+@app.route('/add_app', methods=['POST'])
+@login_required
+def add_application():
+    return redirect(url_for('index'))
+
+
 def parse_apk(file_name, apk_path):
     args = ("utils/aapt", "d", "badging", apk_path)
     popen = subprocess.Popen(args, stdout=subprocess.PIPE)
@@ -87,6 +97,7 @@ def parse_apk(file_name, apk_path):
     package = match.group("name")
     version_code = match.group("versionCode")
     version_name = match.group("versionName")
+
     # db = get_db()
     # db.execute('''insert into build (
     #           app_id, pub_date, version,release_notes ,url) values (?, ?, ?,?,?)''',
