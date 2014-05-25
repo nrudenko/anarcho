@@ -4,7 +4,7 @@ from app.database import db_session
 from flask.ext.login import login_user, login_required, logout_user
 import os
 from app import app, login_manager
-from app.model.user import User
+from app.models.user import User
 from flask import request, session, redirect, url_for, render_template, flash, g
 import re
 
