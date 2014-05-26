@@ -1,9 +1,10 @@
 from datetime import datetime
+from app import db
 from sqlalchemy import Column, Integer, String, DateTime
-from app.database import Base
+# from app.database import Base
 
 
-class Build(Base):
+class Build(db.Model):
     __tablename__ = "builds"
     id = Column('build_id', Integer, primary_key=True)
     app_id = Column('app_id', String)

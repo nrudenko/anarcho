@@ -1,9 +1,8 @@
 import time
 import subprocess
-from app.database import db_session
 from flask.ext.login import login_user, login_required, logout_user
 import os
-from app import app, login_manager
+from app import app, login_manager, db
 from app.models.user import User
 from flask import request, session, redirect, url_for, render_template, flash, g
 import re
@@ -27,8 +26,8 @@ def register():
     if request.method == 'GET':
         return render_template('register.html')
     user = User(request.form['username'], request.form['password'], request.form['email'])
-    db_session.add(user)
-    db_session.commit()
+    db.session.add(user)
+    db.session.commit()
     return redirect(url_for('login'))
 
 

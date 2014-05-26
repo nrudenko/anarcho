@@ -1,9 +1,9 @@
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime
-from app.database import Base
+# from app.database import Base
+from app import db
 
-
-class Application(Base):
+class Application(db.Model):
     __tablename__ = "apps"
     id = Column('app_id', Integer, primary_key=True)
     app_package = Column('app_package', String, unique=True)

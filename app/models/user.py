@@ -1,9 +1,10 @@
 from datetime import datetime
+from app import db
 from sqlalchemy import Column, Integer, String, DateTime
-from app.database import Base
+# from app.database import Base
 
 
-class User(Base):
+class User(db.Model):
     __tablename__ = "users"
     id = Column('user_id', Integer, primary_key=True)
     username = Column('username', String(20), unique=True, index=True)
