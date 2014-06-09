@@ -1,3 +1,3 @@
-from app import database
+from app import db
 
-database.init_db()
+db.create_all()
