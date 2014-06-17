@@ -1,34 +1,35 @@
-from datetime import datetime
+import time
+
 from app import db
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String
 from base import Base
 
 
 class Build(db.Model, Base):
     __tablename__ = "builds"
     id = Column('build_id', Integer, primary_key=True)
-    app_id = Column('app_id', String)
+    app_key = Column('app_key', String)
     version_code = Column('version_code', Integer)
     version_name = Column('version_name', String)
     release_notes = Column('release_notes', String)
     url = Column('url', String)
-    created_on = Column('created_on', DateTime)
+    created_on = Column('created_on', Integer)
 
-    __json_fields__ = ["app_id",
+    __json_fields__ = ["app_key",
                        'version_code',
                        'version_name',
                        'release_notes',
                        'url',
                        'created_on']
 
-    def __init__(self, app_id, version_code, version_name, release_notes, url):
-        self.app_id = app_id
+    def __init__(self, app_key, version_code, version_name, release_notes, url):
+        self.app_key = app_key
         self.version_code = version_code
         self.version_name = version_name
         self.release_notes = release_notes
         self.url = url
-        self.created_on = datetime.utcnow()
+        self.created_on = time.time()
 
     def __repr__(self):
-        return '<Build %r>' % (self.app_id)
+        return '<Build %r>' % (self.app_key)
 

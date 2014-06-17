@@ -1,13 +1,13 @@
-import json
 from app import app, db
+from app.models.application import Application
 from app.models.build import Build
-from app.models.user import User
+from app.models.user import User, UserApp
 from flask import request, jsonify
-from flask.ext.login import current_user, login_required
+from flask.ext.login import login_required, current_user
 
 
-@app.route('/api/login', methods=['POST'])
-def api_login():
+@app.route('/api/auth', methods=['POST'])
+def auth():
     data = request.get_json()
     if data is not None:
         print data
@@ -17,43 +17,51 @@ def api_login():
         password = request.values.get('password')
         user = User.query.filter_by(username=username, password=password).first()
     if user:
-        return '{api_key:"' + user.api_key + '"}'
+        return '{"api_key":"' + user.api_key + '"}'
     return '{"error":"unauthorized"}'
 
 
-@app.route('/api/app/')
+@app.route('/api/apps', methods=['POST', 'GET'])
 @login_required
-def api_app_list():
-    return '{app list}'
+def apps():
+    if request.method == 'POST':
+        package = request.values.get('package')
+        new_app = Application(package)
+
+        user_app = UserApp(current_user.id, new_app.app_key)
+        db.session.add(new_app)
+        db.session.add(user_app)
+        db.session.commit()
+        return '{"app_key":"' + new_app.app_key + '"}'
+    return jsonify(data=[i.to_dict() for i in current_user.apps])
 
 
-@app.route('/api/app/new')
+@app.route('/api/apps/<app_key>')
 @login_required
-def api_app_new():
-    return '{"app created"}'
+def app_info(app_key):
+    application = Application.query.filter_by(app_key=app_key).first()
+    if application:
+        return application.to_json()
+    return "{}"
 
 
-@app.route('/api/app/<id>/upload')
+@app.route('/api/apps/<app_key>/add_build')
 @login_required
-def api_app_upload(id):
-    return '{upload build for app:' + id + '}'
+def app_add_build(app_key):
+    return '{upload build for app:' + app_key + '}'
 
 
-@app.route('/api/app/<id>')
+@app.route('/api/apps/<app_key>/builds')
 @login_required
-def api_app(id):
-    return '{app info ' + id + '}'
-
-
-@app.route('/api/app/<id>/builds')
-@login_required
-def api_build_list():
-    return '{}'
+def builds_list(app_key):
+    result = Build.query.filter_by(app_key=app_key).all()
+    print result
+    return jsonify(data=[i.to_dict() for i in result])
 
 
 @app.route('/api/builds')
 @login_required
-def api_builds():
+def builds():
     result = Build.query
-    return jsonify(data=[i.to_dict() for i in result.all()])
+    return jsonify([i.to_dict() for i in result.all()])
 

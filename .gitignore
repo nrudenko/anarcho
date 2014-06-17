@@ -58,3 +58,4 @@ tmp/
 virtualenv-1.11.6/
 
 *.db
+.DS_Store
