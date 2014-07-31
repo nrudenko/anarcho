@@ -18,21 +18,26 @@ db.create_all()
 
 with app.app_context():
     user = User.query.filter_by(username="admin").first()
-    if user is None:
-        username = "admin"
-        password = "admin"
-        email = "admin@mail.com"
-        auth_token = make_secure_token(email, username, password)
-        user = User(username, password, email, auth_token)
-        db.session.add(user)
-    if user.apps is None:
-        application = Application("com.package")
-        userApp = UserApp(user.id, application.app_key)
+    # if user is None:
+    username = "admin"
+    password = "admin"
+    email = "admin@mail.com"
+    auth_token = make_secure_token(email, username, password)
+    user = User(username, password, email, auth_token)
+    db.session.add(user)
+    db.session.commit()
 
-        build = Build(application.app_key, "11", "1.1", "rn", "http://...")
+    user = User.query.filter_by(username="admin").first()
 
-        db.session.add(application)
-        db.session.add(userApp)
+    # if user.apps is None:
+    application = Application("com.package")
+    print user.to_dict()
+    userApp = UserApp(user.id, application.app_key)
+
+    build = Build(application.app_key, "11", "1.1", "rn", "http://...")
+
+    db.session.add(application)
+    db.session.add(userApp)
 
     track = Track('test1', time.time())
     db.session.add(track)

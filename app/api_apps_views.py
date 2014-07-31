@@ -1,38 +1,30 @@
 from app import app, db
 from app.models.application import Application
 from app.models.build import Build
-from app.models.user import User, UserApp
+from app.models.user import UserApp
 from flask import request, jsonify
+from flask.ext.cors import cross_origin
 from flask.ext.login import login_required, current_user
 
 
-# @app.route('/api/login', methods=['POST'])
-# def auth():
-#     data = request.get_json()
-#     if data is not None:
-#         print data
-#         user = User.query.filter_by(username=data["username"], password=data["password"]).first()
-#     else:
-#         username = request.values.get('username')
-#         password = request.values.get('password')
-#         user = User.query.filter_by(username=username, password=password).first()
-#     if user:
-#         return user.to_json()
-#     return '{"error":"unauthorized"}'
-
-
-@app.route('/api/apps', methods=['POST', 'GET'])
+@app.route('/api/apps/add', methods=['POST'])
+@cross_origin(headers=['x-auth-token'])
 @login_required
-def apps():
-    if request.method == 'POST':
-        package = request.values.get('package')
-        new_app = Application(package)
+def app_create():
+    package = request.values.get('package')
+    new_app = Application(package)
 
-        user_app = UserApp(current_user.id, new_app.app_key)
-        db.session.add(new_app)
-        db.session.add(user_app)
-        db.session.commit()
-        return '{"app_key":"' + new_app.app_key + '"}'
+    user_app = UserApp(current_user.id, new_app.app_key)
+    db.session.add(new_app)
+    db.session.add(user_app)
+    db.session.commit()
+    return '{"app_key":"' + new_app.app_key + '"}'
+
+
+@app.route('/api/apps/list', methods=['GET'])
+@cross_origin(headers=['x-auth-token'])
+@login_required
+def apps_list():
     return jsonify(data=[i.to_dict() for i in current_user.apps])
 
 

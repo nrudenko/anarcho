@@ -19,7 +19,7 @@ app.config.update(dict(
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 db = SQLAlchemy(app)
 
-from app import views, auth, api_views, api_auth_views, tracking_views
+from app import views, auth, api_apps_views, api_auth_views, tracking_views
 
 upload_dir = os.path.abspath(app.config['UPLOAD_FOLDER'])
 if not os.path.exists(upload_dir):
