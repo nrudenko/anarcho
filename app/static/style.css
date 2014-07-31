@@ -1,7 +1,7 @@
 @font-face {
     font-family: logo_font;
     font-style: normal;
-    src: url(logo_font.ttf); /*if IE */
+    src: url('logo_font.ttf'); /*if IE */
     src: local("Grandesign Regular"), url("logo_font.ttf") format("truetype"); /* non-IE */
 }
 

@@ -2,11 +2,12 @@ import time
 
 from app import db
 from app.models.base import Base
+from flask.ext.login import UserMixin
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 
 
-class User(Base, db.Model):
+class User(Base, db.Model, UserMixin):
     __tablename__ = "users"
 
     id = Column('user_id', Integer, primary_key=True)
@@ -14,28 +15,18 @@ class User(Base, db.Model):
     password = Column('password', String(10))
     email = Column('email', String(50), unique=True, index=True)
     registered_on = Column('registered_on', Integer)
-    api_key = Column('api_key', String(50), unique=True, index=True)
+    auth_token = Column('auth_token', String(50), unique=True, index=True)
 
     apps = relationship("Application", secondary="users_apps", backref="users")
 
-    def __init__(self, username, password, email, api_key):
+    __json_fields__ = ['username', 'auth_token']
+
+    def __init__(self, username, password, email, auth_token):
         self.username = username
         self.password = password
         self.email = email
         self.registered_on = time.time()
-        self.api_key = api_key
-
-    def is_authenticated(self):
-        return True
-
-    def is_active(self):
-        return True
-
-    def is_anonymous(self):
-        return False
-
-    def get_id(self):
-        return unicode(self.id)
+        self.auth_token = auth_token
 
     def __repr__(self):
         return '<User %r>' % (self.username)

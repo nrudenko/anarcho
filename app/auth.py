@@ -1,12 +1,11 @@
-from app import login_manager, app, db
+from app import login_manager
 from app.models.user import User
-from flask import session, g, request, render_template, url_for, redirect, Response
-from flask.ext.login import login_user, logout_user, make_secure_token
+from flask import g, Response
 
 
 @login_manager.unauthorized_handler
 def unauthorized():
-    return "{unauthorized}"
+    return Response('{"error":"unauthorized"}', 401, {'WWWAuthenticate': 'Basic realm="Login Required"'})
 
 
 @login_manager.user_loader
@@ -16,60 +15,29 @@ def load_user(user_id):
 
 @login_manager.request_loader
 def load_user_from_request(request):
-    api_key = request.args.get('api_key')
-    if api_key:
-        user = User.query.filter_by(api_key=api_key).first()
-        if user:
-            return user
-    api_key = request.headers.get('Authorization')
-    if api_key:
-        api_key = api_key.replace('Basic ', '', 1)
-        user = User.query.filter_by(api_key=api_key).first()
-        if user:
-            return user
+    auth_token = request.headers.get('x-auth-token')
+    user = None
+    if auth_token:
+        user = User.query.filter_by(auth_token=auth_token).first()
+        g.user = user
 
-    return None
+    return user
 
-
-@app.before_request
-def before_request():
-    g.user = None
-    if 'user_id' in session:
-        g.user = load_user(session['user_id'])
-
-
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'GET':
-        return render_template('register.html')
-    email = request.form['email']
-    username = request.form['username']
-    password = request.form['password']
-    api_key = make_secure_token(email, username, password)
-    user = User(username, password, email, api_key)
-    db.session.add(user)
-    db.session.commit()
-    return redirect(url_for('login'))
-
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if g.user is not None and g.user.is_authenticated():
-        print g.user
-        return redirect(url_for('index'))
-    if request.method == 'GET':
-        return render_template('login.html')
-    username = request.form['username']
-    password = request.form['password']
-    registered_user = User.query.filter_by(username=username, password=password).first()
-    if registered_user is None:
-        return redirect(url_for('login'))
-    login_user(registered_user)
-    return redirect(request.args.get('next') or url_for('index'))
-
-
-@app.route('/logout')
-def logout():
-    logout_user()
-    return redirect(url_for('index'))
+# @app.route('/register', methods=['GET', 'POST'])
+# def register():
+# if request.method == 'GET':
+# return render_template('register.html')
+# email = request.form['email']
+# username = request.form['username']
+# password = request.form['password']
+# api_key = make_secure_token(email, username, password)
+# user = User(username, password, email, api_key)
+# db.session.add(user)
+# db.session.commit()
+# return redirect(url_for('login'))
+#
+# @app.route('/logout')
+# def logout():
+#     logout_user()
+#     return redirect(url_for('index'))
 

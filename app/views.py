@@ -1,12 +1,10 @@
 import time
-from app.build_helper import save_build
-from flask.ext.login import login_user, login_required, logout_user
-import os
-from app import app, login_manager, db, APKParser
-from app.models.user import User
-from flask import request, session, redirect, url_for, render_template, flash, g
-import re
 
+from app.build_helper import save_build
+from flask.ext.login import login_required
+import os
+from app import app
+from flask import request, redirect, url_for, render_template
 
 
 @app.route('/')
