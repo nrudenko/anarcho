@@ -55,7 +55,7 @@ docs/_build/
 .idea/
 flask/
 tmp/
-virtualenv-1.11.6/
+virtualenv-1.9/
 
 *.db
 .DS_Store
