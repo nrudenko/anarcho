@@ -3,19 +3,19 @@ from app.auth import unauthorized
 from app.models.user import User
 from flask import request, g
 from flask.ext.cors import cross_origin
-from flask.ext.login import make_secure_token, login_required
+from flask.ext.login import login_required
 
 
 @app.route('/api/register', methods=['POST'])
+@cross_origin(headers=['Content-Type'])
 def register():
-    email = request.form['email']
-    username = request.form['username']
-    password = request.form['password']
-    api_key = make_secure_token(email, username, password)
-    user = User(username, password, email, api_key)
-    db.session.add(user)
+    email = request.json['email']
+    username = request.json['username']
+    password = request.json['password']
+    new_user = User(username, password, email)
+    db.session.add(new_user)
     db.session.commit()
-    return user.to_json()
+    return new_user.to_json()
 
 
 @app.route('/api/login', methods=['POST'])
@@ -23,10 +23,10 @@ def register():
 def login():
     username = request.json['username']
     password = request.json['password']
-    registered_user = User.query.filter_by(username=username, password=password).first()
-    if registered_user is None:
-        return unauthorized()
-    return registered_user.to_json()
+    registered_user = User.query.filter_by(username=username).first()
+    if registered_user is not None and registered_user.verify_password(password):
+        return registered_user.to_json()
+    return unauthorized()
 
 
 @app.route('/api/user', methods=['GET'])

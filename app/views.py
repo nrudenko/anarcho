@@ -12,12 +12,6 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/guide')
-@login_required
-def guide():
-    return render_template('guide.html')
-
-
 @app.route('/upload', methods=['POST'])
 @login_required
 def upload():
@@ -29,10 +23,4 @@ def upload():
     fo.write(request.data)
     fo.close()
     save_build(file_path)
-    return redirect(url_for('index'))
-
-
-@app.route('/add_app', methods=['POST'])
-@login_required
-def add_application():
     return redirect(url_for('index'))

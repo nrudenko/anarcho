@@ -38,6 +38,6 @@ def load_user_from_request(request):
 #
 # @app.route('/logout')
 # def logout():
-#     logout_user()
+# logout_user()
 #     return redirect(url_for('index'))
 

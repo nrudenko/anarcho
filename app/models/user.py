@@ -2,9 +2,10 @@ import time
 
 from app import db
 from app.models.base import Base
-from flask.ext.login import UserMixin
+from flask.ext.login import UserMixin, make_secure_token
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 class User(Base, db.Model, UserMixin):
@@ -12,7 +13,7 @@ class User(Base, db.Model, UserMixin):
 
     id = Column('user_id', Integer, primary_key=True)
     username = Column('username', String(20), unique=True, index=True)
-    password = Column('password', String(10))
+    pass_hash = Column('pass_hash', String)
     email = Column('email', String(50), unique=True, index=True)
     registered_on = Column('registered_on', Integer)
     auth_token = Column('auth_token', String(50), unique=True, index=True)
@@ -21,15 +22,23 @@ class User(Base, db.Model, UserMixin):
 
     __json_fields__ = ['username', 'auth_token']
 
-    def __init__(self, username, password, email, auth_token):
+    def __init__(self, username, password, email):
         self.username = username
-        self.password = password
+        self.hash_password(password)
+        self.auth_token = make_secure_token(email, username, password)
         self.email = email
         self.registered_on = time.time()
-        self.auth_token = auth_token
+
+    def hash_password(self, password):
+        self.pass_hash = generate_password_hash(password)
+
+    def verify_password(self, password):
+        print password
+        print self.pass_hash
+        return check_password_hash(self.pass_hash, password)
 
     def __repr__(self):
-        return '<User %r>' % (self.username)
+        return self.to_dict()
 
 
 class UserApp(Base, db.Model):

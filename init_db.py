@@ -12,7 +12,6 @@ from app.models.application import Application
 from app.models.build import Build
 from app.models.user import User, UserApp
 from app.models.tracks import Track
-from flask.ext.login import make_secure_token
 
 db.create_all()
 
@@ -22,8 +21,7 @@ with app.app_context():
     username = "admin"
     password = "admin"
     email = "admin@mail.com"
-    auth_token = make_secure_token(email, username, password)
-    user = User(username, password, email, auth_token)
+    user = User(username, password, email)
     db.session.add(user)
     db.session.commit()
 
