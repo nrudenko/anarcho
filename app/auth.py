@@ -23,21 +23,3 @@ def load_user_from_request(request):
 
     return user
 
-# @app.route('/register', methods=['GET', 'POST'])
-# def register():
-# if request.method == 'GET':
-# return render_template('register.html')
-# email = request.form['email']
-# username = request.form['username']
-# password = request.form['password']
-# api_key = make_secure_token(email, username, password)
-# user = User(username, password, email, api_key)
-# db.session.add(user)
-# db.session.commit()
-# return redirect(url_for('login'))
-#
-# @app.route('/logout')
-# def logout():
-# logout_user()
-#     return redirect(url_for('index'))
-

@@ -1,4 +1,5 @@
 from flask.ext.sqlalchemy import SQLAlchemy
+from flask.templating import render_template
 import os
 from flask import Flask
 from flask.ext.login import LoginManager
@@ -12,14 +13,14 @@ app.config.update(dict(
     SECRET_KEY=os.urandom(24),
     USERNAME='admin',
     PASSWORD='admin',
-    UPLOAD_FOLDER='tmp/',
 ))
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 db = SQLAlchemy(app)
 
-from app import views, auth, api_apps_views, api_auth_views, tracking_views
+from app import apps_views, auth_views, tracking_views
 
-upload_dir = os.path.abspath(app.config['UPLOAD_FOLDER'])
-if not os.path.exists(upload_dir):
-    os.makedirs(upload_dir)
+
+@app.errorhandler(404)
+def stub(e):
+    return render_template("stub.html")

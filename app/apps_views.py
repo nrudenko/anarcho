@@ -8,24 +8,25 @@ from flask.ext.login import login_required, current_user
 
 
 @app.route('/api/apps/add', methods=['POST'])
-@cross_origin(headers=['x-auth-token'])
+@cross_origin(headers=['x-auth-token', 'Content-Type'])
 @login_required
 def app_create():
-    package = request.values.get('package')
-    new_app = Application(package)
+    name = request.json['name']
+    print name
+    new_app = Application(name)
 
     user_app = UserApp(current_user.id, new_app.app_key)
     db.session.add(new_app)
     db.session.add(user_app)
     db.session.commit()
-    return '{"app_key":"' + new_app.app_key + '"}'
+    return new_app.to_json()
 
 
 @app.route('/api/apps/list', methods=['GET'])
 @cross_origin(headers=['x-auth-token'])
 @login_required
 def apps_list():
-    return jsonify(data=[i.to_dict() for i in current_user.apps])
+    return jsonify(list=[i.to_dict() for i in current_user.apps])
 
 
 @app.route('/api/apps/<app_key>')

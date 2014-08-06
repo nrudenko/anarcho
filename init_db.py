@@ -1,10 +1,12 @@
-import sys
 import time
 
 import os
 
 
-if len(sys.argv) >= 2 and sys.argv[1] == 'local':
+# if len(sys.argv) > 2 and sys.argv[1] == 'local':
+# os.environ['DATABASE_URL'] = 'sqlite:///anarcho.db'
+
+if 'DATABASE_URL' not in os.environ:
     os.environ['DATABASE_URL'] = 'sqlite:///anarcho.db'
 
 from app import db, app
@@ -28,7 +30,7 @@ with app.app_context():
     user = User.query.filter_by(username="admin").first()
 
     # if user.apps is None:
-    application = Application("com.package")
+    application = Application("TestApp")
     print user.to_dict()
     userApp = UserApp(user.id, application.app_key)
 
