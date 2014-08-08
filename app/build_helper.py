@@ -10,6 +10,7 @@ def save_build(apk_path, app_key):
     version_code = apk_file.get_androidversion_code()
     version_name = apk_file.get_androidversion_name()
 
-    _build = Build(app_key, version_code, version_name, '', 'http://')
-    db.session.add(_build)
+    build = Build(app_key, version_code, version_name, '', 'http://')
+    db.session.add(build)
     db.session.commit()
+    return build;

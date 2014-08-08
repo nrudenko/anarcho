@@ -3,9 +3,6 @@ import time
 import os
 
 
-# if len(sys.argv) > 2 and sys.argv[1] == 'local':
-# os.environ['DATABASE_URL'] = 'sqlite:///anarcho.db'
-
 if 'DATABASE_URL' not in os.environ:
     os.environ['DATABASE_URL'] = 'sqlite:///anarcho.db'
 
