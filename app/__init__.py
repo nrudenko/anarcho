@@ -1,7 +1,7 @@
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.templating import render_template
 import os
-from flask import Flask
+from flask import Flask, redirect
 from flask.ext.login import LoginManager
 
 app = Flask(__name__)
@@ -29,6 +29,12 @@ if not app.debug:
 from app import apps_views, auth_views, tracking_views
 
 
+@app.route('/')
+def index():
+    return render_template("index.html")
+
+
 @app.errorhandler(404)
+@app.errorhandler(405)
 def stub(e):
-    return render_template("stub.html")
+    return redirect("/")
