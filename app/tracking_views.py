@@ -5,11 +5,6 @@ from flask.ext.cors import cross_origin
 from flask.ext.login import login_required
 
 
-@app.route('/tracks', methods=['GET'])
-def render_tracks():
-    return app.send_static_file("tracks.html")
-
-
 @app.route('/api/track/list', methods=['GET'])
 @cross_origin(headers=['x-auth-token'])
 @login_required

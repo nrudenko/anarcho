@@ -59,3 +59,7 @@ virtualenv-1.9/
 
 *.db
 .DS_Store
+
+builds/
+icon.png
+twistd.pid

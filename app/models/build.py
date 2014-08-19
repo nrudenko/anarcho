@@ -12,22 +12,23 @@ class Build(db.Model, Base):
     version_code = Column('version_code', Integer)
     version_name = Column('version_name', String)
     release_notes = Column('release_notes', String)
-    url = Column('url', String)
+    package = Column('package', String)
     created_on = Column('created_on', Integer)
 
-    __json_fields__ = ["app_key",
+    __json_fields__ = ["id",
+                       "app_key",
                        'version_code',
                        'version_name',
                        'release_notes',
-                       'url',
+                       'package',
                        'created_on']
 
-    def __init__(self, app_key, version_code, version_name, release_notes, url):
+    def __init__(self, app_key, version_code, version_name, release_notes, package):
         self.app_key = app_key
         self.version_code = version_code
         self.version_name = version_name
         self.release_notes = release_notes
-        self.url = url
+        self.package = package
         self.created_on = time.time()
 
     def __repr__(self):

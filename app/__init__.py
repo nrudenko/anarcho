@@ -1,3 +1,4 @@
+from file_worker import LocalStorageWorker
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.templating import render_template
 import os
@@ -10,7 +11,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 app.config.update(dict(
-    UPLOAD_FOLDER=os.path.abspath('tmp'),
+    UPLOAD_FOLDER=os.path.abspath('builds'),
     SECRET_KEY=os.urandom(24),
     USERNAME='admin',
     PASSWORD='admin'
@@ -18,6 +19,12 @@ app.config.update(dict(
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 db = SQLAlchemy(app)
+
+builds_dir = app.config['UPLOAD_FOLDER']
+if not os.path.exists(builds_dir):
+    os.makedirs(builds_dir)
+
+build_worker = LocalStorageWorker(app)
 
 if not app.debug:
     import logging
