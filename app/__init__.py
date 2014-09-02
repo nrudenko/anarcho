@@ -11,6 +11,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 import config_module
+
 app.config.from_object(config_module.DefaultConfig)
 
 db = SQLAlchemy(app)
@@ -21,6 +22,13 @@ if not os.path.exists(tmp_dir):
 
 worker_type = storage_types[app.config["STORAGE_WORKER"]]
 storage_worker = worker_type(app)
+
+if not app.debug:
+    import logging
+
+    exceptionsHandler = logging.FileHandler("exceptions.log")
+    exceptionsHandler.setLevel(logging.ERROR)
+    app.logger.addHandler(exceptionsHandler)
 
 from app import apps_views, auth_views, tracking_views
 

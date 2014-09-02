@@ -2,7 +2,7 @@
 
 
 function start(){
-    twistd web --port 7000 --wsgi app.app --logfile log.txt;
+    twistd web --port 7000 --wsgi app.app --logfile access.log;
     echo "Anarcho started..."
 }
 

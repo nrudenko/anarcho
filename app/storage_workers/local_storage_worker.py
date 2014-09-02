@@ -11,8 +11,8 @@ class LocalStorageWorker(BaseStorageWorker):
             raise Exception("Your app should have LOCAL_STORAGE_DIR in env_config")
 
     def get_app_dir(self, app_key):
-        local_storege_dir = os.path.abspath(self.flask_app.config['LOCAL_STORAGE_DIR'])
-        return os.path.join(local_storege_dir, app_key)
+        local_storage_dir = os.path.abspath(self.flask_app.config['LOCAL_STORAGE_DIR'])
+        return os.path.join(local_storage_dir, app_key)
 
     def get_build_path(self, build):
         return os.path.join(self.get_app_dir(build.app_key), str(build.id) + ".apk")
