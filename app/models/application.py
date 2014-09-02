@@ -12,10 +12,10 @@ class Application(Base, db.Model):
     name = Column('name', String)
     package = Column('package', String)
     app_key = Column('app_key', String, unique=True)
-    icon = Column('icon', String)
+    icon_url = Column('icon_url', String)
     created_on = Column('created_on', Integer)
 
-    __json_fields__ = {"package", "app_key", "icon", "created_on", "name"}
+    __json_fields__ = {"package", "app_key", "icon_url", "created_on", "name"}
 
     def __init__(self, name):
         self.name = name

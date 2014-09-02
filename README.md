@@ -8,7 +8,12 @@ Mandatory first init:
     ./first_run.sh
 
 ```
-Start:
+Start for developing:
 ```python
-   python run.py
+   python manage.py run_dev
+```
+
+Start for production:
+```python
+   ./srv start
 ```
