@@ -85,7 +85,7 @@ def upload(app_key):
         storage_worker.put(build, apk_file_path, icon_path)
 
         application = Application.query.filter_by(app_key=app_key).first()
-        application.icon_url = storage_worker.get_icon_link(build)
+        application.icon_url = storage_worker.get_icon_link(app_key)
         db.session.commit()
         return build.to_json()
     return '{"error":"upload_error"}'
@@ -104,9 +104,8 @@ def get_build(app_key, build_id):
 
 @app.route('/api/icon/<app_key>', methods=['GET'])
 def get_icon(app_key):
-    build = Build.query.filter_by(app_key=app_key).first()
-    if build is not None and isinstance(storage_worker, LocalStorageWorker):
-        icon_path = storage_worker.get_icon_path(build)
+    if isinstance(storage_worker, LocalStorageWorker):
+        icon_path = storage_worker.get_icon_path(app_key)
         if os.path.exists(icon_path):
             return send_file(icon_path)
     return Response(status=404)

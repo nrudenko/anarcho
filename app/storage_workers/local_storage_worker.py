@@ -17,8 +17,8 @@ class LocalStorageWorker(BaseStorageWorker):
     def get_build_path(self, build):
         return os.path.join(self.get_app_dir(build.app_key), str(build.id) + ".apk")
 
-    def get_icon_path(self, build):
-        return os.path.join(self.get_app_dir(build.app_key), "icon.png")
+    def get_icon_path(self, app_key):
+        return os.path.join(self.get_app_dir(app_key), "icon.png")
 
     def put(self, build, tmp_apk_path, tmp_icon_path):
         new_path = self.get_build_path(build)
@@ -41,8 +41,8 @@ class LocalStorageWorker(BaseStorageWorker):
     def get_build_link(self, build):
         return self.get_main_url() + "build/%s/%d" % (build.app_key, build.id)
 
-    def get_icon_link(self, build):
-        return self.get_main_url() + "icon/%s" % build.app_key
+    def get_icon_link(self, app_key):
+        return self.get_main_url() + "icon/%s" % app_key
 
     def remove(self, build):
         path = self.get_build_path(build)
