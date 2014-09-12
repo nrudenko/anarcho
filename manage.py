@@ -1,4 +1,5 @@
 #!flask/bin/python
+from app.models.user import User
 from flask.ext.script import Manager
 
 from app import app, db
@@ -53,6 +54,15 @@ def init_db_stub():
     db.session.add(user_app)
     db.session.add(build)
 
+    db.session.commit()
+
+
+@manager.command
+def drop_session(name):
+    user = User.query.filter_by(username=name).first()
+    print 'Old token ', user.auth_token
+    user.update_auth_token()
+    print 'New token ', user.auth_token
     db.session.commit()
 
 

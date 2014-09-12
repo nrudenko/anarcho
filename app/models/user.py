@@ -25,9 +25,12 @@ class User(Base, db.Model, UserMixin):
     def __init__(self, username, password, email):
         self.username = username
         self.hash_password(password)
-        self.auth_token = make_secure_token(email, username, password)
         self.email = email
         self.registered_on = time.time()
+        self.update_auth_token()
+
+    def update_auth_token(self):
+        self.auth_token = make_secure_token(self.email, self.username)
 
     def hash_password(self, password):
         self.pass_hash = generate_password_hash(password)

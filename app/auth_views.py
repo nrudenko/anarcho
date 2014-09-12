@@ -19,7 +19,7 @@ def register():
 
 
 @app.route('/api/login', methods=['POST'])
-@cross_origin(headers=['Content-Type'])
+@cross_origin(headers=['Content-Type','x-auth-token'])
 def login():
     username = request.json['username']
     password = request.json['password']
