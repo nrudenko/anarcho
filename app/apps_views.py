@@ -1,11 +1,12 @@
 from app import storage_worker, app, db
 from app.build_helper import parse_apk
+from app.permission_manager import app_permissions
 from flask.helpers import send_file
 import os
 from app.models.application import Application
 from app.models.build import Build
 from app.models.user import UserApp
-from flask import request, jsonify, Response
+from flask import request, jsonify, Response, make_response
 from flask.ext.cors import cross_origin
 from flask.ext.login import login_required, current_user
 from werkzeug.utils import secure_filename
@@ -19,7 +20,7 @@ def app_create():
     name = request.json['name']
     new_app = Application(name)
 
-    user_app = UserApp(current_user.id, new_app.app_key)
+    user_app = UserApp(current_user.id, new_app.app_key, "w")
     db.session.add(new_app)
     db.session.add(user_app)
     db.session.commit()
@@ -40,12 +41,13 @@ def app_info(app_key):
     application = Application.query.filter_by(app_key=app_key).first()
     if application:
         return application.to_json()
-    return '{"error":"app_not_found"}'
+    return make_response('{"error":"app_not_found"}', 404)
 
 
 @app.route('/api/apps/<app_key>/builds', methods=['DELETE'])
 @cross_origin(headers=['x-auth-token', 'Content-Type'], methods=['DELETE'])
 @login_required
+@app_permissions(permissions=["w"])
 def remove_build(app_key):
     ids = request.json['ids']
     builds = Build.query.filter(Build.app_key == app_key, Build.id.in_(ids)).all()
@@ -88,18 +90,18 @@ def upload(app_key):
         application.icon_url = storage_worker.get_icon_link(app_key)
         db.session.commit()
         return build.to_json()
-    return '{"error":"upload_error"}'
+    return make_response('{"error":"upload_error"}', 400)
 
 
 @app.route('/api/apps/<app_key>/<int:build_id>', methods=['GET'])
 def get_build(app_key, build_id):
     build = Build.query.filter_by(app_key=app_key, id=build_id).first()
     if build is None:
-        return '{"error":"build_not_found"}'
+        return make_response('{"error":"build_not_found"}', 404)
     try:
         return storage_worker.get(build)
     except IOError:
-        return '{"error":"build_file_not_found"}'
+        return make_response('{"error":"build_not_found"}', 404)
 
 
 @app.route('/api/icon/<app_key>', methods=['GET'])

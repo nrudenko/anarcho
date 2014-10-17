@@ -42,12 +42,12 @@ def init_db_stub():
     username = "admin"
     password = "admin"
     email = "admin@mail.com"
-    user = User(username, password, email)
+    user = User(email, username, password)
     db.session.add(user)
     db.session.commit()
 
     application = Application("TestApp")
-    user_app = UserApp(user.id, application.app_key)
+    user_app = UserApp(user.email, application.app_key, "w")
 
     build = Build(application.app_key, "11", "1.1", "release notes")
     db.session.add(application)

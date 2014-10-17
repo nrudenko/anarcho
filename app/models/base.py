@@ -15,5 +15,8 @@ class Base():
         for public_key in self.__json_fields__:
             value = getattr(self, public_key)
             if value:
-                fields_dict[public_key] = value
+                if hasattr(value, "__call__"):
+                    fields_dict[public_key] = value()
+                else:
+                    fields_dict[public_key] = value
         return fields_dict

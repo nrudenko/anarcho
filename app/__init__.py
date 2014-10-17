@@ -30,7 +30,7 @@ if not app.debug:
     exceptionsHandler.setLevel(logging.ERROR)
     app.logger.addHandler(exceptionsHandler)
 
-from app import apps_views, auth_views, tracking_views
+from app import apps_views, auth_views, tracking_views, team_views
 
 
 @app.route('/')
