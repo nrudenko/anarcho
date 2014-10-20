@@ -107,7 +107,7 @@ def serialize(obj, serializer=None):
                 serializer = serializerMap.get(type(obj[0]))
         else:
             serializer = serializerMap.get(type(obj))
-
+    print serializer
     if isinstance(obj, Iterable):
         if len(obj) > 0:
             return jsonify(list=[serializer(i).to_dict() for i in obj])

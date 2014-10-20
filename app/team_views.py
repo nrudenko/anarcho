@@ -52,6 +52,7 @@ def update_user():
     db.session.commit()
     return serialize(user_app, PermissionSerializer)
 
+
 def add_user():
     app_key = request.json['app_key']
     email = request.json['email']
