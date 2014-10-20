@@ -1,16 +1,46 @@
 from app import app, db
-from app.models.user import UserApp, User
+from app.api_models import serialize, PermissionSerializer
+from app.models.user import User
+from app.models.user_app import UserApp
 from app.permission_manager import app_permissions
-from flask import request, jsonify, make_response
+from flask import request, make_response
 from flask.ext.cors import cross_origin
 
 from flask.ext.login import login_required
 
 
-@app.route('/api/team/user', methods=['PATCH'])
-@cross_origin(headers=['x-auth-token', 'Content-Type'], methods=['PATCH'])
+@app.route('/api/permission/<app_key>', methods=['GET'])
+@cross_origin(headers=['x-auth-token'])
 @login_required
 @app_permissions(permissions=["w"])
+def users_list(app_key=None):
+    user_apps = UserApp.query.filter_by(app_key=app_key).all()
+    return serialize(user_apps, serializer=PermissionSerializer)
+
+
+@app.route('/api/permission', methods=['POST', 'PATCH', 'DELETE'])
+@cross_origin(headers=['x-auth-token', 'Content-Type'], methods=['POST', 'PATCH', 'DELETE'])
+@login_required
+@app_permissions(permissions=["w"])
+def revoke_team_membership():
+    if request.method == 'POST':
+        result = add_user()
+    if request.method == 'PATCH':
+        result = update_user()
+    if request.method == 'DELETE':
+        result = revoke_team_membership()
+    return result
+
+
+def revoke_team_membership():
+    app_key = request.json['app_key']
+    email = request.json['email']
+    user_app = UserApp.query.filter_by(app_key=app_key, email=email).first()
+    db.session.delete(user_app)
+    db.session.commit()
+    return serialize(user_app, PermissionSerializer)
+
+
 def update_user():
     app_key = request.json['app_key']
     email = request.json['email']
@@ -20,14 +50,8 @@ def update_user():
         return make_response('{"error":"user_app_not_found}', 404)
     user_app.permission = permission
     db.session.commit()
-    print user_app.to_json()
-    return user_app.to_json()
+    return serialize(user_app, PermissionSerializer)
 
-
-@app.route('/api/team/user', methods=['POST'])
-@cross_origin(headers=['x-auth-token', 'Content-Type'])
-@login_required
-@app_permissions(permissions=["w"])
 def add_user():
     app_key = request.json['app_key']
     email = request.json['email']
@@ -40,27 +64,4 @@ def add_user():
     user_app.user = user
     db.session.add(user_app)
     db.session.commit()
-    return user_app.to_json()
-
-
-@app.route('/api/team/<app_key>/list/', methods=['GET'])
-@cross_origin(headers=['x-auth-token', 'Content-Type'])
-@login_required
-@app_permissions(permissions=["w"])
-def users_list(app_key):
-    user_apps = UserApp.query.filter_by(app_key=app_key).all()
-
-    return jsonify(list=[i.to_dict() for i in user_apps])
-
-
-@app.route('/api/team/revoke', methods=['POST'])
-@cross_origin(headers=['x-auth-token', 'Content-Type'])
-@login_required
-@app_permissions(permissions=["w"])
-def revoke_team_membership():
-    app_key = request.json['app_key']
-    email = request.json['email']
-    user_app = UserApp.query.filter_by(app_key=app_key, email=email).first()
-    db.session.delete(user_app)
-    db.session.commit()
-    return user_app.to_json()
+    return serialize(user_app, PermissionSerializer)

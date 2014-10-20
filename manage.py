@@ -33,7 +33,8 @@ def init_db_stub():
     """
     Init db and add stub values
     """
-    from app.models.user import User, UserApp
+    from app.models.user import User
+    from app.models.user_app import UserApp
     from app.models.application import Application
     from app.models.build import Build
 

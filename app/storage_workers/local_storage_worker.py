@@ -28,7 +28,7 @@ class LocalStorageWorker(BaseStorageWorker):
             os.makedirs(new_path_dir)
 
         os.rename(tmp_apk_path, new_path)
-        os.rename(tmp_icon_path, self.get_icon_path(build))
+        os.rename(tmp_icon_path, self.get_icon_path(build.app_key))
         return
 
     def get(self, build):

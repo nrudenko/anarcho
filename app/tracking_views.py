@@ -1,5 +1,5 @@
 from app import app, db
-from app.models.tracks import Track
+from app.models.track import Track
 from flask import request, jsonify
 from flask.ext.cors import cross_origin
 from flask.ext.login import login_required

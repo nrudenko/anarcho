@@ -2,10 +2,9 @@ import time
 
 from app import db
 from sqlalchemy import Column, Integer, String
-from base import Base
 
 
-class Build(db.Model, Base):
+class Build(db.Model):
     __tablename__ = "builds"
     id = Column('build_id', Integer, primary_key=True)
     app_key = Column('app_key', String)
@@ -13,13 +12,6 @@ class Build(db.Model, Base):
     version_name = Column('version_name', String)
     release_notes = Column('release_notes', String)
     created_on = Column('created_on', Integer)
-
-    __json_fields__ = ["id",
-                       "app_key",
-                       'version_code',
-                       'version_name',
-                       'release_notes',
-                       'created_on']
 
     def __init__(self, app_key, version_code, version_name, release_notes=None):
         self.app_key = app_key
@@ -29,5 +21,5 @@ class Build(db.Model, Base):
         self.created_on = time.time()
 
     def __repr__(self):
-        return '<Build %r>' % (self.app_key)
+        return '<Build %r>' % self.app_key
 

@@ -1,6 +1,6 @@
 from functools import wraps
+from app.models.user_app import UserApp
 
-from app.models.user import UserApp
 from flask import request, make_response, g
 
 
