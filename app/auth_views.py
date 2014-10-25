@@ -1,34 +1,39 @@
 from app import app, db
 from app.api_models import serialize, SessionSerializer
-from app.auth import unauthorized
 from app.models.user import User
-from flask import request, g
+from flask import request, g, Response
 from flask.ext.cors import cross_origin
 from flask.ext.login import login_required
-from sqlalchemy import or_
 
 
 @app.route('/api/register', methods=['POST'])
-@cross_origin(headers=['Content-Type'])
+@cross_origin(headers=['Content-Type', 'x-auth-token'])
 def register():
     email = request.json['email']
-    name = request.json['username']
+    name = request.json['name']
     password = request.json['password']
-    new_user = User(email, name, password)
-    db.session.add(new_user)
-    db.session.commit()
-    return serialize(new_user, SessionSerializer)
+    u = User.query.filter(User.email == email).first()
+    if u is None:
+        new_user = User(email, name, password)
+        db.session.add(new_user)
+        db.session.commit()
+        return serialize(new_user, SessionSerializer)
+    else:
+        return Response('{"error":"user_already_registered"}', 409)
 
 
 @app.route('/api/login', methods=['POST'])
 @cross_origin(headers=['Content-Type', 'x-auth-token'])
 def login():
-    username = request.json['username']
+    email = request.json['email']
     password = request.json['password']
-    registered_user = User.query.filter(or_(User.name == username, User.email == username)).first()
-    if registered_user is not None and registered_user.verify_password(password):
-        return serialize(registered_user, SessionSerializer)
-    return unauthorized()
+    registered_user = User.query.filter(User.email == email).first()
+    if registered_user is not None:
+        if registered_user.verify_password(password):
+            return serialize(registered_user, SessionSerializer)
+        else:
+            return Response('{"error":"wrong_credentials"}', 403)
+    return Response('{"error":"user_not_found"}', 404)
 
 
 @app.route('/api/user', methods=['GET'])

@@ -20,6 +20,5 @@ def load_user_from_request(request):
     if auth_token:
         user = User.query.filter_by(auth_token=auth_token).first()
         g.user = user
-
     return user
 

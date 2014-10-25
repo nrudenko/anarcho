@@ -6,7 +6,6 @@ from flask import Flask, redirect
 from flask.ext.login import LoginManager
 
 app = Flask(__name__)
-
 login_manager = LoginManager()
 login_manager.init_app(app)
 
@@ -30,7 +29,7 @@ if not app.debug:
     exceptionsHandler.setLevel(logging.ERROR)
     app.logger.addHandler(exceptionsHandler)
 
-from app import apps_views, auth_views, tracking_views, team_views
+from app import apps_views, auth, auth_views, tracking_views, team_views
 
 
 @app.route('/')

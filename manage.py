@@ -60,7 +60,7 @@ def init_db_stub():
 
 @manager.command
 def drop_session(name):
-    user = User.query.filter_by(username=name).first()
+    user = User.query.filter_by(name=name).first()
     print 'Old token ', user.auth_token
     user.update_auth_token()
     print 'New token ', user.auth_token
