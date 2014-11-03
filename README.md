@@ -3,17 +3,36 @@ anarcho
 
 Android archives hosting
 
-Mandatory first init:
+Setup environment:
 ```
-    ./first_run.sh
+    virtualenv venv --no-site-packages
+    source venv/bin/activate
+```
+ 
+Install from PyPi:
+```
+    pip install anarcho
 
 ```
-Start for developing:
-```python
-   python manage.py run_dev
+
+Start:
+```
+    anarcho init_db
+    anarcho start
 ```
 
-Start for production:
-```python
-   ./srv start
+===================================================
+Prepare for develop:
+```
+    python setup.py develop
+```
+
+Fill db with some stub data:
+```
+    anarcho init_db_stub
+```
+
+Start for develop:
+```
+    anarcho start_dev
 ```

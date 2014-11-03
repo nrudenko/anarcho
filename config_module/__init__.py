@@ -3,6 +3,7 @@ import os
 
 class DefaultConfig(object):
     TMP_DIR = os.path.abspath("tmp")
+    LOGS_DIR = os.path.abspath("logs")
     SECRET_KEY = os.urandom(24)
     USERNAME = "admin"
     PASSWORD = "admin"

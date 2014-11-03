@@ -56,6 +56,7 @@ docs/_build/
 flask/
 tmp/
 virtualenv-1.9/
+venv/
 
 *.db
 .DS_Store
