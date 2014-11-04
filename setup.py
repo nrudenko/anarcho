@@ -1,5 +1,12 @@
+"""
+Anarcho setup script.
+"""
+
 from setuptools import setup, find_packages
 
+
+with open('requirements.txt') as requirements_file:
+    requirements = requirements_file.readlines()
 
 setup(
     name='anarcho',
@@ -14,16 +21,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     platforms='any',
-    install_requires=[
-        'Flask==0.10.1',
-        'Flask-Cors==1.3.1',
-        'Flask-Login==0.2.11',
-        'Flask-SQLAlchemy==1.0',
-        'Flask-Script==2.0.5',
-        'passlib==1.6.2',
-        'CherryPy==3.6.0',
-        'Paste==1.7.5.1'
-    ],
+    install_requires=requirements,
     entry_points={
         'console_scripts': [
             'anarcho = scripts.anarcho_manage:main',
