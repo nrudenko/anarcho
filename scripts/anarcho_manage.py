@@ -1,42 +1,72 @@
-from flask.ext.script import Manager
+"""
 
-from anarcho import app, db
+Usage:
+    anarcho init [<CONFIG_FILE>]
+    anarcho (start | stop | restart | init_db | stub_db)
 
-manager = Manager(app)
+Options:
+    -c CONFIG_FILE --config=CONFIG_FILE  Path to config for init
+
+"""
+import shutil
+from os.path import expanduser
+import os
+
+from docopt import docopt
 
 
-@manager.command
-def start_dev():
+def try_backup_existing_config(config_path):
+    try:
+        config_dst_bkp = config_path + ".bkp"
+        shutil.copy(config_path, config_dst_bkp)
+    except OSError:
+        pass
+    except IOError:
+        pass
+
+
+def init_config(config_src):
+    config_path = os.path.join(expanduser("~"), ".anarcho", "config.py")
+    config_dst = config_path
+    if config_src is None:
+        import config_module
+
+        config_src = os.path.join(os.path.dirname(config_module.__file__), "config.py")
+
+    try_backup_existing_config(config_dst)
+
+    try:
+        os.makedirs(os.path.dirname(config_dst))
+    except OSError:
+        pass
+    shutil.copy(config_src, config_dst)
+
+    print 'Created config: %s' % config_path
+
+
+def init(config_file=None):
     """
-    Run app for development
+    Init app
     """
-    from anarcho import anarcho_cherry
-    import config_module
-
-    manager.app.config.from_object(config_module.DevConfig)
-    anarcho_cherry.prepare_dev_server()
-    anarcho_cherry.run()
+    init_config(config_file)
 
 
-@manager.command
 def init_db():
-    """
-    Init db (creates all tables)
-    """
+    from anarcho import db
+
     db.create_all()
 
 
-@manager.command
-def init_db_stub():
+def stub_db():
     """
     Init db and add stub values
     """
+    from anarcho import db
+
     from anarcho.models.user import User
     from anarcho.models.user_app import UserApp
     from anarcho.models.application import Application
     from anarcho.models.build import Build
-
-    init_db()
 
     username = "admin"
     password = "admin"
@@ -56,8 +86,8 @@ def init_db_stub():
     db.session.commit()
 
 
-@manager.command
 def drop_session(email):
+    from anarcho import db
     from anarcho.models.user import User
 
     user = User.query.filter_by(email=email).first()
@@ -67,30 +97,47 @@ def drop_session(email):
     db.session.commit()
 
 
-@manager.command
 def start():
     from anarcho import anarcho_cherry
+
     print "Anarcho starting..."
-    anarcho_cherry.prepare_prod_server()
     anarcho_cherry.run()
 
-@manager.command
+
 def stop():
     import os
     import signal
 
-    pid_file = open('anarcho.pid')
-    pid = pid_file.readline()
-    pid_file.close()
-    os.kill(int(pid), signal.SIGQUIT)
+    pid_file_path = 'anarcho.pid'
+    if os.path.exists(pid_file_path):
+        pid_file = open(pid_file_path)
+        pid = pid_file.readline()
+        pid_file.close()
+        os.kill(int(pid), signal.SIGQUIT)
     print "Anarcho stopped..."
 
 
-@manager.command
 def restart():
     stop()
     start()
 
 
 def main():
-    manager.run()
+    args = docopt(__doc__)
+    if args['stub_db']:
+        stub_db()
+    if args['init']:
+        init(args['<CONFIG_FILE>'])
+        pass
+    if args['start']:
+        start()
+        pass
+    if args['stop']:
+        stop()
+        pass
+    if args['restart']:
+        stop()
+        pass
+    if args['init_db']:
+        init_db()
+        pass

@@ -1,16 +1,33 @@
+from os.path import expanduser
+import os
+import uuid
+
 from anarcho.storage_workers import storage_types
 from flask.ext.sqlalchemy import SQLAlchemy
-import os
 from flask import Flask, redirect
 from flask.ext.login import LoginManager
 
+
+def get_default_config_path():
+    config_path = os.path.join(expanduser("~"), ".anarcho", "config.py")
+    return config_path
+
+
 app = Flask(__name__, static_url_path="")
+
+app.config.update({
+    'AUTO_RELOAD': False,
+    'DEBUG': False,
+    'SECRET_KEY': str(uuid.uuid4())})
+
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-import config_module
-
-app.config.from_object(config_module.DefaultConfig)
+default_config_path = get_default_config_path()
+if os.path.exists(default_config_path):
+    app.config.from_pyfile(default_config_path)
+else:
+    raise ValueError("Configuration file does not exist. Use 'anarcho init' to initialize the file.")
 
 db = SQLAlchemy(app)
 
@@ -22,15 +39,17 @@ logs_dir = app.config["LOGS_DIR"]
 if not os.path.exists(logs_dir):
     os.makedirs(logs_dir)
 
-worker_type = storage_types[app.config["STORAGE_WORKER"]]
-storage_worker = worker_type(app)
+app.worker_config = app.config['STORAGE_WORKER']
+
+worker_type = app.worker_config['type']
+storage_worker = storage_types[worker_type](app)
 
 if not app.debug:
     import logging
 
-    exceptionsHandler = logging.FileHandler(os.path.join(logs_dir, "error.log"))
-    exceptionsHandler.setLevel(logging.ERROR)
-    app.logger.addHandler(exceptionsHandler)
+    log_handler = logging.FileHandler(os.path.join(logs_dir, "anarcho.log"))
+    log_handler.setLevel(logging.NOTSET)
+    app.logger.addHandler(log_handler)
 
 from anarcho import apps_views, auth, auth_views, tracking_views, team_views
 

@@ -1,7 +1,6 @@
 from collections import Iterable
 
 from anarcho.models.application import Application
-
 from anarcho.models.build import Build
 from anarcho.models.user import User
 from anarcho.models.user_app import UserApp
@@ -111,6 +110,6 @@ def serialize(obj, serializer=None):
         if len(obj) > 0:
             return jsonify(list=[serializer(i).to_dict() for i in obj])
         else:
-            return "[]"
+            return '{"list":[]}'
     else:
         return serializer(obj).to_json()

@@ -7,11 +7,11 @@ class LocalStorageWorker(BaseStorageWorker):
     def __init__(self, flask_app):
         super(LocalStorageWorker, self).__init__(flask_app)
 
-        if "LOCAL_STORAGE_DIR" not in self.flask_app.config:
-            raise Exception("Your app should have LOCAL_STORAGE_DIR in env_config")
+        if 'storage_dir' not in self.flask_app.worker_config:
+            raise Exception("Your app should have storage_dir in STORAGE_WORKER config")
 
     def get_app_dir(self, app_key):
-        local_storage_dir = os.path.abspath(self.flask_app.config['LOCAL_STORAGE_DIR'])
+        local_storage_dir = self.flask_app.worker_config['storage_dir']
         return os.path.join(local_storage_dir, app_key)
 
     def get_build_path(self, build):
@@ -35,7 +35,7 @@ class LocalStorageWorker(BaseStorageWorker):
         return send_file(self.get_build_path(build))
 
     def get_main_url(self):
-        host_name = self.flask_app.config["STORAGE_HOST_NAME"]
+        host_name = self.flask_app.worker_config['storage_host_name']
         return str(host_name + "/api/").replace("//api", "/api")
 
     def get_build_link(self, build):

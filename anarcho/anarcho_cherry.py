@@ -1,7 +1,6 @@
 import time
 
 import cherrypy
-from cherrypy.process.plugins import Daemonizer, PIDFile
 from paste.translogger import TransLogger
 from anarcho import app
 
@@ -47,24 +46,16 @@ class FotsTransLogger(TransLogger):
         self.logger.log(self.logging_level, message)
 
 
-def prepare_dev_server():
-    # Set the configuration of the web server
-    cherrypy.config.update({
-        'server.socket_port': 5000,
-        'engine.autoreload.on': True,
-        'log.screen': True
-    })
-
-
-def prepare_prod_server():
-    # Daemonizer(cherrypy.engine).subscribe()
-    cherrypy.config.update({
-        'server.socket_port': 8080,
-    })
-    PIDFile(cherrypy.engine, 'anarcho.pid').subscribe()
-
-
 def run():
+    # Daemonizer(cherrypy.engine).subscribe()
+    # PIDFile(cherrypy.engine, 'anarcho.pid').subscribe()
+
+    cherrypy.config.update({
+        'server.socket_port': app.config['PORT'],
+        'engine.autoreload.on': app.config['AUTO_RELOAD'],
+        'log.screen': app.config['DEBUG']
+    })
+
     # Enable custom Paste access logging
     log_format = (
         '[%(time)s] REQUES %(REQUEST_METHOD)s %(status)s %(REQUEST_URI)s '
