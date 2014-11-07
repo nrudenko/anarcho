@@ -3,9 +3,10 @@
 Usage:
     anarcho init [<CONFIG_FILE>]
     anarcho (start | stop | restart | init_db | stub_db)
+    anarcho start -t
 
 Options:
-    -c CONFIG_FILE --config=CONFIG_FILE  Path to config for init
+    --nodaemon -t  Start as no daemon
 
 """
 import shutil
@@ -97,10 +98,11 @@ def drop_session(email):
     db.session.commit()
 
 
+pid_file_path = 'anarcho.pid'
+
+
 def start():
     from anarcho import anarcho_cherry
-
-    print "Anarcho starting..."
     anarcho_cherry.run()
 
 
@@ -108,7 +110,6 @@ def stop():
     import os
     import signal
 
-    pid_file_path = 'anarcho.pid'
     if os.path.exists(pid_file_path):
         pid_file = open(pid_file_path)
         pid = pid_file.readline()
@@ -130,7 +131,14 @@ def main():
         init(args['<CONFIG_FILE>'])
         pass
     if args['start']:
-        start()
+        if args['--nodaemon']:
+            start()
+        else:
+            from daemonize import Daemonize
+
+            daemon = Daemonize(app="anarcho", pid=pid_file_path, action=start)
+            print "Anarcho started..."
+            daemon.start()
         pass
     if args['stop']:
         stop()

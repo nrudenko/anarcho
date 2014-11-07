@@ -4,9 +4,11 @@ import uuid
 
 from anarcho.storage_workers import storage_types
 from flask.ext.sqlalchemy import SQLAlchemy
-from flask import Flask, redirect
+from flask import Flask, redirect, request
 from flask.ext.login import LoginManager
 
+import logging
+from datetime import datetime
 
 def get_default_config_path():
     config_path = os.path.join(expanduser("~"), ".anarcho", "config.py")
@@ -44,12 +46,19 @@ app.worker_config = app.config['STORAGE_WORKER']
 worker_type = app.worker_config['type']
 storage_worker = storage_types[worker_type](app)
 
-if not app.debug:
-    import logging
+access_log_handler = logging.FileHandler(os.path.join(logs_dir, "access.log"))
+access_log_handler.setLevel(logging.NOTSET)
+app.logger.addHandler(access_log_handler)
 
-    log_handler = logging.FileHandler(os.path.join(logs_dir, "anarcho.log"))
-    log_handler.setLevel(logging.NOTSET)
-    app.logger.addHandler(log_handler)
+@app.before_request
+def pre_request_logging():
+    app.logger.info('  '.join([
+        datetime.today().ctime(),
+        request.method,
+        request.url
+    ])
+    )
+
 
 from anarcho import apps_views, auth, auth_views, tracking_views, team_views
 

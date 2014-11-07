@@ -63,4 +63,4 @@ venv/
 
 builds/
 icon.png
-twistd.pid
+*.pid
