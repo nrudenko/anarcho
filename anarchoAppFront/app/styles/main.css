@@ -1,0 +1,71 @@
+@font-face {
+    font-family: 'carnivalee_freakshowregular';
+    src: url('../fonts/logo_font.eot');
+    src: url('../fonts/logo_font.eot?#iefix') format('embedded-opentype'),
+    url('../fonts/logo_font.woff2') format('woff2'),
+    url('../fonts/logo_font.woff') format('woff'),
+    url('../fonts/logo_font.ttf') format('truetype'),
+    url('../fonts/logo_font.svg#carnivalee_freakshowregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+.navbar-brand {
+    font-family: carnivalee_freakshowregular;
+    font-size: 40px;
+}
+
+.app-item-container {
+    float: left;
+    height: 120px;
+    width: 120px;
+    margin: 10px;
+    text-align: center;
+}
+
+.app-icon {
+    height: 72px;
+    width: 72px;
+}
+
+.details-app-icon {
+    height: 72px;
+    width: 72px;
+    margin: 10px;
+}
+
+.add-app-icon {
+    height: 48px;
+    width: 48px;
+    position: absolute;
+    margin: auto;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.upload-dragover {
+    background: #f5f5f5;
+    height: 100%;
+}
+
+.gear-icon {
+    background: url("/images/gear_icon.png") no-repeat;
+    height: 72px;
+    width: 72px;
+    margin: 10px;
+}
+
+.gear-icon:hover {
+    background: url("/images/gear_icon_hovered.png") no-repeat;
+    height: 72px;
+    width: 72px;
+    margin: 10px;
+}
+
+.right_divider {
+    height: 100%;
+    border: 0;
+    border-right: 1px solid #cccccc;
+}
