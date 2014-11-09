@@ -1,9 +1,10 @@
+import os
+
 from anarcho import storage_worker, app, db
 from anarcho.serializer import serialize
 from anarcho.build_helper import parse_apk
 from anarcho.permission_manager import app_permissions
 from flask.helpers import send_file
-import os
 from anarcho.models.application import Application
 from anarcho.models.build import Build
 from anarcho.models.user_app import UserApp
@@ -48,6 +49,9 @@ def app_info(app_key):
 @login_required
 @app_permissions(permissions=['w'])
 def upload(app_key):
+    release_notes = 'empty'
+    if 'releaseNotes' in request.form:
+        release_notes = request.form['releaseNotes']
     apk_file = request.files['file']
     if apk_file:
         apk_filename = secure_filename(apk_file.filename)
@@ -58,7 +62,7 @@ def upload(app_key):
 
         build = result["build"]
         icon_path = result["icon_path"]
-
+        build.release_notes = release_notes
         db.session.add(build)
         db.session.commit()
 

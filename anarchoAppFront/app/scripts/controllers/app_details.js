@@ -26,9 +26,7 @@ var appDetailsCtrl = function ($rootScope, $scope, $modal, $timeout, $routeParam
 
     $scope.buildsList = function (appKey) {
         AppsService.getBuilds(appKey).then(function (res) {
-            console.log(res.data);
             $scope.builds = res.data.list;
-            console.log($scope.builds);
         })
     };
 
@@ -71,14 +69,15 @@ var appDetailsCtrl = function ($rootScope, $scope, $modal, $timeout, $routeParam
     $scope.init();
 
     //
-    var ShowBuildInfoCtrl = function ($scope, $modalInstance, UrlService, build) {
+    var ShowBuildInfoCtrl = function ($scope, $modalInstance, UrlService, build, appKey) {
         $scope.build = build;
+        $scope.appKey = appKey;
         $scope.getBuildUrl = function () {
-            return UrlService.getBuildUrl(build);
+            return UrlService.getBuildUrl(appKey, build);
         }
     };
 
-    ShowBuildInfoCtrl.$inject = ['$scope', '$modalInstance', 'UrlService', 'build'];
+    ShowBuildInfoCtrl.$inject = ['$scope', '$modalInstance', 'UrlService', 'build', 'appKey'];
 
     $scope.showBuildInfo = function (build) {
         $modal.open({
@@ -88,6 +87,9 @@ var appDetailsCtrl = function ($rootScope, $scope, $modal, $timeout, $routeParam
                 resolve: {
                     build: function () {
                         return build;
+                    },
+                    appKey: function () {
+                        return $scope.appKey;
                     }
                 }
             }

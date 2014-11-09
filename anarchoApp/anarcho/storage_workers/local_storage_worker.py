@@ -1,3 +1,4 @@
+import shutil
 from anarcho.storage_workers.base_worker import BaseStorageWorker
 from flask import send_file
 import os
@@ -27,9 +28,8 @@ class LocalStorageWorker(BaseStorageWorker):
         if not os.path.exists(new_path_dir):
             os.makedirs(new_path_dir)
 
-        os.rename(tmp_apk_path, new_path)
-        os.rename(tmp_icon_path, self.get_icon_path(build.app_key))
-        return
+        shutil.copy(tmp_apk_path, new_path)
+        shutil.copy(tmp_icon_path, self.get_icon_path(build.app_key))
 
     def get(self, build):
         return send_file(self.get_build_path(build))

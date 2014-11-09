@@ -15,7 +15,6 @@ var AuthCtrl = function ($scope, $rootScope, AUTH_EVENTS, AuthService, Session) 
             Session.create(data.authToken);
             $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
         }).catch(function (data) {
-            console.log(data.error);
             $scope.error = data.error;
             $rootScope.$broadcast(AUTH_EVENTS.loginFailed);
         });

@@ -1,8 +1,8 @@
 var UrlService = function (configuration) {
     var urlService = {};
-    urlService.getBuildUrl = function (build) {
+    urlService.getBuildUrl = function (app_key, build) {
         if (build.id != null)
-            return configuration.API_URL + "apps/" + build.app_key + "/" + build.id;
+            return configuration.API_URL + "apps/" + app_key + "/" + build.id;
     };
     return urlService;
 };

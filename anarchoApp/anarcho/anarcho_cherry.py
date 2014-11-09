@@ -1,8 +1,6 @@
 import os
-import time
 
 import cherrypy
-from paste.translogger import TransLogger
 from anarcho import app
 
 
