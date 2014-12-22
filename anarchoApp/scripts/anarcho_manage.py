@@ -62,29 +62,30 @@ def stub_db():
     """
     Init db and add stub values
     """
-    from anarcho import db
+    from anarcho import app, db
 
     from anarcho.models.user import User
     from anarcho.models.user_app import UserApp
     from anarcho.models.application import Application
     from anarcho.models.build import Build
 
-    username = "admin"
-    password = "admin"
-    email = "admin@mail.com"
-    user = User(email, username, password)
-    db.session.add(user)
-    db.session.commit()
+    with app.app_context():
+        username = "admin"
+        password = "admin"
+        email = "admin@mail.com"
+        user = User(email, username, password)
+        db.session.add(user)
+        db.session.commit()
 
-    application = Application("TestApp")
-    user_app = UserApp(user.email, application.app_key, "w")
+        application = Application("TestApp")
+        user_app = UserApp(user.email, application.app_key, "w")
 
-    build = Build(application.app_key, "11", "1.1", "release notes")
-    db.session.add(application)
-    db.session.add(user_app)
-    db.session.add(build)
+        build = Build(application.app_key, "11", "1.1", "release notes")
+        db.session.add(application)
+        db.session.add(user_app)
+        db.session.add(build)
 
-    db.session.commit()
+        db.session.commit()
 
 
 def drop_session(email):
@@ -103,6 +104,7 @@ pid_file_path = 'anarcho.pid'
 
 def start():
     from anarcho import anarcho_cherry
+
     anarcho_cherry.run()
 
 

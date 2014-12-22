@@ -23,6 +23,9 @@ var AppSettingsCtrl = function ($scope, $routeParams, AppsService) {
             case "remove":
                 includePage = "views/settings_remove_app.html";
                 break;
+            case "plugin":
+                includePage = "views/settings_plugin_config.html";
+                break;
         }
 
         return includePage;

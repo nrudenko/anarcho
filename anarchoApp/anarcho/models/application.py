@@ -7,7 +7,7 @@ from sqlalchemy import Column, Integer, String
 
 class Application(db.Model):
     __tablename__ = "apps"
-    id = Column('app_id', Integer, primary_key=True)
+    id = Column('id', Integer, primary_key=True)
     name = Column('name', String)
     package = Column('package', String)
     app_key = Column('app_key', String, unique=True)

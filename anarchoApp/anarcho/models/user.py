@@ -12,7 +12,7 @@ class User(db.Model, UserMixin):
     pass_hash = Column('pass_hash', String)
     email = Column('email', String(50), unique=True)
     registered_on = Column('registered_on', Integer)
-    auth_token = Column('auth_token', String(50), )
+    auth_token = Column('auth_token', String(50))
     apps = relationship("Application", secondary="users_apps", backref="users")
 
     def __init__(self, email, name=None, password=None):
