@@ -24,6 +24,11 @@ var AppsService = function (Api) {
     appService.removeBuilds = function (appKey, ids) {
         return Api.delete('apps/' + appKey + "/builds", {ids: ids});
     };
+
+    appService.getPluginConfig = function (appKey) {
+        return Api.get('apps/' + appKey + "/plugin");
+    };
+
     return appService;
 };
 

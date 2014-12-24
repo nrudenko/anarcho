@@ -10,6 +10,7 @@ Options:
 
 """
 import shutil
+from anarcho.models.token import Token
 from os.path import expanduser
 import os
 
@@ -76,9 +77,11 @@ def stub_db():
         user = User(email, username, password)
         db.session.add(user)
         db.session.commit()
+        db.session.add(Token(user))
+        db.session.commit()
 
         application = Application("TestApp")
-        user_app = UserApp(user.email, application.app_key, "w")
+        user_app = UserApp(user.id, application.app_key, "w")
 
         build = Build(application.app_key, "11", "1.1", "release notes")
         db.session.add(application)

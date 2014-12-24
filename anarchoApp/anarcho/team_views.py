@@ -2,11 +2,9 @@ from anarcho import app, db
 from anarcho.serializer import serialize, PermissionSerializer
 from anarcho.models.user import User
 from anarcho.models.user_app import UserApp
-from anarcho.permission_manager import app_permissions
+from anarcho.access_manager import app_permissions, login_required
 from flask import request, make_response
 from flask.ext.cors import cross_origin
-
-from flask.ext.login import login_required
 
 
 @app.route('/api/permission/<app_key>', methods=['GET'])
@@ -14,7 +12,7 @@ from flask.ext.login import login_required
 @login_required
 @app_permissions(permissions=["w"])
 def users_list(app_key=None):
-    user_apps = UserApp.query.filter_by(app_key=app_key).all()
+    user_apps = UserApp.query.filter(UserApp.app_key == app_key, UserApp.permission != 'u').all()
     return serialize(user_apps, serializer=PermissionSerializer)
 
 
@@ -28,11 +26,11 @@ def revoke_team_membership():
     if request.method == 'PATCH':
         result = update_user()
     if request.method == 'DELETE':
-        result = revoke_team_membership()
+        result = remove_permission()
     return result
 
 
-def revoke_team_membership():
+def remove_permission():
     app_key = request.json['app_key']
     email = request.json['email']
     user_app = UserApp.query.filter_by(app_key=app_key, email=email).first()
@@ -61,7 +59,9 @@ def add_user():
     user = User.query.filter_by(email=email).first()
     if user is None:
         user = User(email)
-    user_app = UserApp(email, app_key, permission)
+        db.session.add(user)
+        db.session.commit()
+    user_app = UserApp(user.id, app_key, permission)
     user_app.user = user
     db.session.add(user_app)
     db.session.commit()

@@ -2,12 +2,10 @@ from anarcho import app, db
 from anarcho.models.track import Track
 from flask import request, jsonify
 from flask.ext.cors import cross_origin
-from flask.ext.login import login_required
 
 
 @app.route('/api/track/list', methods=['GET'])
 @cross_origin(headers=['x-auth-token'])
-@login_required
 def tracks_list():
     result = Track.query.all()
     return jsonify(data=[i.to_dict() for i in result])

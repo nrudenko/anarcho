@@ -1,9 +1,10 @@
 from anarcho import app, db
-from anarcho.serializer import serialize, SessionSerializer
+from anarcho.access_manager import login_required
+from anarcho.models.token import Token
+from anarcho.serializer import serialize
 from anarcho.models.user import User
 from flask import request, g, Response
 from flask.ext.cors import cross_origin
-from flask.ext.login import login_required
 
 
 @app.route('/api/register', methods=['POST'])
@@ -17,9 +18,13 @@ def register():
         new_user = User(email, name, password)
         db.session.add(new_user)
         db.session.commit()
-        return serialize(new_user, SessionSerializer)
-    else:
-        return Response('{"error":"user_already_registered"}', 409)
+
+        token = Token(new_user)
+        db.session.add(token)
+        db.session.commit()
+        return serialize(token)
+
+    return Response('{"error":"user_already_registered"}', 409)
 
 
 @app.route('/api/login', methods=['POST'])
@@ -27,13 +32,12 @@ def register():
 def login():
     email = request.json['email']
     password = request.json['password']
-    registered_user = User.query.filter(User.email == email).first()
-    if registered_user is not None:
-        if registered_user.verify_password(password):
-            return serialize(registered_user, SessionSerializer)
-        else:
-            return Response('{"error":"wrong_credentials"}', 403)
-    return Response('{"error":"user_not_found"}', 404)
+    u = User.query.filter(User.email == email).first()
+    if u is not None:
+        if u.verify_password(password):
+            return serialize(u.token)
+
+    return Response('{"error":"wrong_credentials"}', 403)
 
 
 @app.route('/api/user', methods=['GET'])

@@ -1,44 +1,59 @@
+from anarcho.models.token import Token
+from anarcho.models.user import User
+from flask.json import jsonify
 import os
 
 from anarcho import storage_worker, app, db
 from anarcho.serializer import serialize
 from anarcho.build_helper import parse_apk
-from anarcho.permission_manager import app_permissions
+from anarcho.access_manager import app_permissions, login_required
 from flask.helpers import send_file
 from anarcho.models.application import Application
 from anarcho.models.build import Build
 from anarcho.models.user_app import UserApp
-from flask import request, Response, make_response
+from flask import request, Response, make_response, g
 from flask.ext.cors import cross_origin
-from flask.ext.login import login_required, current_user
 from werkzeug.utils import secure_filename
 from storage_workers import LocalStorageWorker
+
+
+@app.route('/api/apps', methods=['GET'])
+@cross_origin(headers=['x-auth-token', 'Content-Type'])
+@login_required
+def apps_list():
+    user_apps = UserApp.query.filter_by(user_id=g.user.id).all()
+    return serialize(user_apps)
 
 
 @app.route('/api/apps', methods=['POST', 'GET'])
 @cross_origin(headers=['x-auth-token', 'Content-Type'])
 @login_required
 def app_create():
-    if request.method == 'GET':
-        user_apps = UserApp.query.filter_by(email=current_user.email).all()
-        return serialize(user_apps)
-    else:
-        name = request.json['name']
-        new_app = Application(name)
+    name = request.json['name']
+    new_app = Application(name)
 
-        user_app = UserApp(current_user.email, new_app.app_key, "w")
-        db.session.add(new_app)
-        db.session.add(user_app)
-        db.session.commit()
-        return serialize(user_app)
+    user_app = UserApp(g.user.id, new_app.app_key, "w")
+    db.session.add(new_app)
+    db.session.add(user_app)
+    db.session.commit()
+
+    api_user = User()
+    db.session.add(api_user)
+    db.session.commit()
+
+    api_user_token = Token(api_user)
+    api_user_app = UserApp(api_user.id, new_app.app_key, "u")
+    db.session.add(api_user_app)
+    db.session.add(api_user_token)
+    db.session.commit()
+    return serialize(user_app)
 
 
 @app.route('/api/apps/<app_key>', methods=['GET'])
 @cross_origin(headers=['x-auth-token'])
 @login_required
-@app_permissions(permissions=['r', 'w'])
 def app_info(app_key):
-    application = UserApp.query.filter_by(app_key=app_key, email=current_user.email).first()
+    application = UserApp.query.filter_by(app_key=app_key, user_id=g.user.id).first()
     if application:
         return serialize(application)
     return make_response('{"error":"app_not_found"}', 404)
@@ -47,7 +62,7 @@ def app_info(app_key):
 @app.route('/api/apps/<app_key>', methods=['POST'])
 @cross_origin(headers=['x-auth-token'])
 @login_required
-@app_permissions(permissions=['w'])
+@app_permissions(permissions=['w', 'u'])
 def upload(app_key):
     release_notes = 'empty'
     if 'releaseNotes' in request.form:
@@ -115,3 +130,19 @@ def get_icon(app_key=None):
         if os.path.exists(icon_path):
             return send_file(icon_path)
     return Response(status=404)
+
+
+@app.route('/api/apps/<app_key>/plugin', methods=['GET'])
+@cross_origin(headers=['x-auth-token', 'Content-Type'])
+@login_required
+@app_permissions(permissions=['w', 'r'])
+def get_plugin_config(app_key):
+    user_app = UserApp.query.filter_by(app_key=app_key, permission='u').first()
+    if user_app is None:
+        return make_response('{"error":"app_not_found"}', 404)
+    user = user_app.user
+    response = {
+        'uploadUrl': app.config['PUBLIC_HOST'] + '/api/apps/' + app_key,
+        'apiToken': user.token.auth_token
+    }
+    return jsonify(response)

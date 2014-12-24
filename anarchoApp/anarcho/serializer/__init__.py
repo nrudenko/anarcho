@@ -2,6 +2,7 @@ from collections import Iterable
 
 from anarcho.models.application import Application
 from anarcho.models.build import Build
+from anarcho.models.token import Token
 from anarcho.models.user import User
 from anarcho.models.user_app import UserApp
 from flask import jsonify
@@ -84,6 +85,13 @@ class SessionSerializer(Serializer):
         self.authToken = user.auth_token
 
 
+class TokenSerializer(Serializer):
+    __json_fields__ = ['authToken']
+
+    def __init__(self, token):
+        self.authToken = token.auth_token
+
+
 class TrackApi(Serializer):
     __json_fields__ = ['id',
                        'track_log',
@@ -95,7 +103,8 @@ serializerMap = {
     UserApp: AppSerializer,
     Application: AppSerializer,
     User: UserSerializer,
-    Build: BuildSerializer
+    Build: BuildSerializer,
+    Token: TokenSerializer
 }
 
 
