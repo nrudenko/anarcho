@@ -1,8 +1,10 @@
+import datetime
+
 from anarcho.models.token import Token
+
 from anarcho.models.user import User
 from flask.json import jsonify
 import os
-
 from anarcho import storage_worker, app, db
 from anarcho.serializer import serialize
 from anarcho.build_helper import parse_apk
@@ -118,7 +120,13 @@ def get_build(app_key, build_id):
     if build is None:
         return make_response('{"error":"build_not_found"}', 404)
     try:
-        return storage_worker.get(build)
+        app = Application.query.filter_by(app_key=build.app_key).first()
+        upload_date = datetime.datetime.fromtimestamp(build.created_on).strftime('%Y-%m-%d_%H-%M-%S')
+        name = '{proj}_{date}.apk'.format(proj=app.name, date=upload_date)
+        return send_file(storage_worker.get(build),
+                         mimetype='application/vnd.android.package-archive',
+                         as_attachment=True,
+                         attachment_filename=name)
     except IOError:
         return make_response('{"error":"build_not_found"}', 404)
 

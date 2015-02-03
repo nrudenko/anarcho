@@ -1,6 +1,5 @@
 import shutil
 from anarcho.storage_workers.base_worker import BaseStorageWorker
-from flask import send_file
 import os
 
 
@@ -32,7 +31,7 @@ class LocalStorageWorker(BaseStorageWorker):
         shutil.copy(tmp_icon_path, self.get_icon_path(build.app_key))
 
     def get(self, build):
-        return send_file(self.get_build_path(build))
+        return self.get_build_path(build)
 
     def get_main_url(self):
         host_name = self.flask_app.worker_config['storage_host_name']
