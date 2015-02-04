@@ -4,6 +4,9 @@ import hmac
 from flask import request, make_response, g, current_app, Response
 
 
+permissions = ['r', 'w', 'u']
+
+
 def _secret_key(key=None):
     if key is None:
         key = current_app.config['SECRET_KEY']
@@ -86,3 +89,7 @@ def app_permissions(permissions=[]):
         return decorated_view
 
     return decorator
+
+
+def is_permission_allowed(permission):
+    return permission in permissions

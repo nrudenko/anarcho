@@ -2,7 +2,7 @@ from anarcho import app, db
 from anarcho.serializer import serialize, PermissionSerializer
 from anarcho.models.user import User
 from anarcho.models.user_app import UserApp
-from anarcho.access_manager import app_permissions, login_required
+from anarcho.access_manager import app_permissions, login_required, is_permission_allowed
 from flask import request, make_response
 from flask.ext.cors import cross_origin
 
@@ -24,31 +24,41 @@ def revoke_team_membership():
     if request.method == 'POST':
         result = add_user()
     if request.method == 'PATCH':
-        result = update_user()
+        result = update_permission(get_user_app())
     if request.method == 'DELETE':
-        result = remove_permission()
+        result = remove_permission(get_user_app())
     return result
 
 
-def remove_permission():
-    app_key = request.json['app_key']
+def get_user_app():
     email = request.json['email']
-    user_app = UserApp.query.filter_by(app_key=app_key, email=email).first()
-    db.session.delete(user_app)
-    db.session.commit()
-    return serialize(user_app, PermissionSerializer)
+    app_key = request.json['app_key']
+    user = User.query.filter_by(email=email).first()
+    if user:
+        return UserApp.query.filter_by(app_key=app_key, user_id=user.id).first()
 
 
-def update_user():
-    app_key = request.json['app_key']
-    email = request.json['email']
-    permission = request.json['permission']
-    user_app = UserApp.query.filter_by(app_key=app_key, email=email).first()
-    if user_app is None:
+def remove_permission(user_app):
+    if user_app:
+        result = serialize(user_app, PermissionSerializer)
+        db.session.delete(user_app)
+        db.session.commit()
+        return result
+    else:
         return make_response('{"error":"user_app_not_found}', 404)
-    user_app.permission = permission
-    db.session.commit()
-    return serialize(user_app, PermissionSerializer)
+
+
+def update_permission(user_app):
+    permission = request.json['permission']
+    if not is_permission_allowed(permission):
+        result = make_response('{"error":"wrong_permission}', 400)
+    elif user_app:
+        user_app.permission = permission
+        db.session.commit()
+        result = serialize(user_app, PermissionSerializer)
+    else:
+        result = make_response('{"error":"user_app_not_found}', 404)
+    return result
 
 
 def add_user():

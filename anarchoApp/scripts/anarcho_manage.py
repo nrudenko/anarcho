@@ -10,7 +10,6 @@ Options:
 
 """
 import shutil
-from anarcho.models.token import Token
 from os.path import expanduser
 import os
 
@@ -69,6 +68,7 @@ def stub_db():
     from anarcho.models.user_app import UserApp
     from anarcho.models.application import Application
     from anarcho.models.build import Build
+    from anarcho.models.token import Token
 
     with app.app_context():
         username = "admin"

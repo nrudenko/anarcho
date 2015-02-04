@@ -7,10 +7,6 @@ class AppsTest(AnarchoTestCase):
         AnarchoTestCase.setUp(self)
         self.make_auth()
 
-    def create_app(self, app_name='test_app'):
-        params = {'name': app_name}
-        return self.post_json('/api/apps', params)
-
     def test_apps_list(self):
         self.create_app()
 

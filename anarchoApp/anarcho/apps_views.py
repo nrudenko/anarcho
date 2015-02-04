@@ -15,6 +15,7 @@ from anarcho.models.build import Build
 from anarcho.models.user_app import UserApp
 from flask import request, Response, make_response, g
 from flask.ext.cors import cross_origin
+from sqlalchemy import desc
 from werkzeug.utils import secure_filename
 from storage_workers import LocalStorageWorker
 
@@ -110,7 +111,7 @@ def remove_build(app_key):
 @cross_origin(headers=['x-auth-token'])
 @login_required
 def builds_list(app_key):
-    builds = Build.query.filter_by(app_key=app_key).all()
+    builds = Build.query.filter_by(app_key=app_key).order_by(desc(Build.created_on)).all()
     return serialize(builds)
 
 
