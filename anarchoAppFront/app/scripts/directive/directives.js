@@ -25,4 +25,52 @@ var IconSrc = function () {
     return errSrc;
 };
 
+
+var OrderBtn = function () {
+    var orderBtn = {};
+    orderBtn.restrict = 'E';
+    orderBtn.scope = false;
+
+    orderBtn.link = function ($scope, element, attrs) {
+        var update = function () {
+            var symbol = "&nbsp;";
+            if ($scope.order.field === attrs.field) {
+                symbol = $scope.order.reverse ? "&#9660;" : "&#9650;";
+            }
+            element.html("<span>" + attrs.text + symbol + "</span>");
+        };
+
+        element.bind("click", function () {
+            var reverse = !$scope.order.reverse;
+            if (attrs.field != $scope.order.field) {
+                reverse = true;
+            }
+            $scope.$apply(function () {
+                $scope.order = {field: attrs.field,
+                    reverse: reverse};
+            });
+        });
+
+        element.hover(function () {
+            element.css('cursor', 'hand');
+            element.css('cursor', 'pointer');
+        });
+
+        $scope.$watch(function () {
+            return $scope.order;
+        }, function () {
+            update();
+        });
+
+        if (attrs.reverse != undefined && attrs.reverse != null) {
+            $scope.order = {field: attrs.field,
+                reverse: attrs.reverse === 'true'};
+            update();
+        }
+
+    };
+    return orderBtn;
+};
+
 app.directive('iconSrc', IconSrc);
+app.directive('orderBtn', OrderBtn);

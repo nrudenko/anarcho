@@ -30,12 +30,6 @@ var appDetailsCtrl = function ($rootScope, $scope, $modal, $timeout, $routeParam
         })
     };
 
-    $scope.addBuild = function () {
-        AppsService.addBuild($scope.appKey).then(function (res) {
-            $scope.builds.push(res.data);
-        });
-    };
-
     $scope.getApp = function (appKey) {
         AppsService.get(appKey).then(function (res) {
             $scope.app = res.data;
