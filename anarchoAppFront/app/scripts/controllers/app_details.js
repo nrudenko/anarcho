@@ -1,28 +1,14 @@
 'use strict';
-var appDetailsCtrl = function ($rootScope, $scope, $modal, $timeout, $routeParams, AppsService) {
+var appDetailsCtrl = function ($rootScope, $scope, $modal, $timeout, $routeParams, AppsService, $location, PermissionService) {
+
+    PermissionService.extend($scope);
+
     $scope.app = {};
     $scope.builds = [];
 
     $scope.appKey = $routeParams.app_key;
 
-    $scope.canWrite = function () {
-        return $scope.hasPermission("w");
-    };
-
-    $scope.hasPermission = function (key) {
-        if ($scope.app.permission) {
-            return $scope.app.permission.indexOf(key) != -1;
-        } else {
-            return false;
-        }
-    };
-
     $scope.progress = -1;
-
-    $scope.init = function () {
-        $rootScope.showLoader();
-        $scope.getApp($scope.appKey);
-    };
 
     $scope.buildsList = function (appKey) {
         AppsService.getBuilds(appKey).then(function (res) {
@@ -60,34 +46,8 @@ var appDetailsCtrl = function ($rootScope, $scope, $modal, $timeout, $routeParam
         //.xhr(function(xhr){xhr.upload.addEventListener(...)})
     };
 
-    $scope.init();
-
-    //
-    var ShowBuildInfoCtrl = function ($scope, $modalInstance, UrlService, build, appKey) {
-        $scope.build = build;
-        $scope.appKey = appKey;
-        $scope.getBuildUrl = function () {
-            return UrlService.getBuildUrl(appKey, build);
-        }
-    };
-
-    ShowBuildInfoCtrl.$inject = ['$scope', '$modalInstance', 'UrlService', 'build', 'appKey'];
-
     $scope.showBuildInfo = function (build) {
-        $modal.open({
-                templateUrl: 'views/build_details_modal.html',
-                size: "sm",
-                controller: ShowBuildInfoCtrl,
-                resolve: {
-                    build: function () {
-                        return build;
-                    },
-                    appKey: function () {
-                        return $scope.appKey;
-                    }
-                }
-            }
-        );
+        $location.path('/apps/' + $scope.app.app_key + '/' + build.id);
     };
 
     $scope.ids = [];
@@ -109,8 +69,13 @@ var appDetailsCtrl = function ($rootScope, $scope, $modal, $timeout, $routeParam
             $scope.ids.push(id);
         }
     };
+
+
+    $rootScope.showLoader();
+    $scope.getApp($scope.appKey);
 };
 
-app.controller("AppDetailsCtrl", ['$rootScope', '$scope', '$modal', '$timeout', '$routeParams', 'AppsService', appDetailsCtrl]);
+app.controller("AppDetailsCtrl", ['$rootScope', '$scope', '$modal', '$timeout', '$routeParams', 'AppsService',
+    '$location', 'PermissionService', appDetailsCtrl]);
 
 

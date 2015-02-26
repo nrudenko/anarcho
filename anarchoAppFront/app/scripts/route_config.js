@@ -8,6 +8,9 @@ app.config(['$routeProvider',
             when('/apps/:app_key', {
                 templateUrl: 'views/app_detail.html'
             }).
+            when('/apps/:app_key/:build_id', {
+                templateUrl: 'views/build_details.html'
+            }).
             when('/settings/:app_key/', {
                 templateUrl: 'views/app_settings.html'
             }).

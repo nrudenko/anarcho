@@ -16,7 +16,7 @@
 
     <div>
         <div class="pull-left"><img icon-src="{{ app.icon_url }}" class="details-app-icon">{{ app.name }}</div>
-        <a href="#/settings/{{ app.app_key }}">
+        <a ng-href="#/settings/{{ app.app_key }}">
             <div class="pull-right gear-icon"></div>
         </a>
     </div>
@@ -44,8 +44,8 @@
             </td>
             <td ng-click="showBuildInfo(b)">{{ b.version_code }}</td>
             <td ng-click="showBuildInfo(b)">{{ b.version_name }}</td>
-            <td ng-click="showBuildInfo(b)">{{ b.release_notes }}</td>
-            <td ng-click="showBuildInfo(b)">{{ b.created_on * 1000 | date : 'yyyy-MM-dd HH:mm:ss' }}</td>
+            <td ng-click="showBuildInfo(b)" style="text-align: left;">{{ b.release_notes | addEllipsis : 30 }}</td>
+            <td ng-click="showBuildInfo(b)" style="white-space: nowrap;">{{ b.created_on * 1000 | date : 'yyyy-MM-dd HH:mm:ss' }}</td>
         </tr>
     </table>
 

@@ -72,5 +72,29 @@ var OrderBtn = function () {
     return orderBtn;
 };
 
+function FocusOn($timeout) {
+    var checkDirectivePrerequisites = function (attrs) {
+        if (!attrs.focusOn && attrs.focusOn != "") {
+            throw "FocusOnCondition missing attribute to evaluate";
+        }
+    };
+
+    return {
+        restrict: "A",
+        link: function (scope, element, attrs, ctrls) {
+            checkDirectivePrerequisites(attrs);
+
+            scope.$watch(attrs.focusOn, function (currentValue, lastValue) {
+                if (currentValue == true) {
+                    $timeout(function () {
+                        element.focus();
+                    });
+                }
+            });
+        }
+    };
+}
+
 app.directive('iconSrc', IconSrc);
 app.directive('orderBtn', OrderBtn);
+app.directive('focusOn', ['$timeout', FocusOn]);

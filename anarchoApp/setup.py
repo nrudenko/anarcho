@@ -10,7 +10,7 @@ with open('requirements.txt') as requirements_file:
 
 setup(
     name='anarcho',
-    version='0.3.0',
+    version='0.4.0',
     url='https://github.com/nrudenko/anarcho',
     license='MIT',
     author='Nikolay Rudenko',

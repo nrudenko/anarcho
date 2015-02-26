@@ -29,6 +29,14 @@ var AppsService = function (Api) {
         return Api.get('apps/' + appKey + "/plugin");
     };
 
+    appService.getBuild = function (appKey, buildId) {
+        return Api.get('apps/' + appKey + "/" + buildId);
+    };
+
+    appService.postNotes = function (appKey, buildId, notes) {
+        return Api.post('apps/' + appKey + "/" + buildId + "/notes", {release_notes: notes});
+    };
+
     return appService;
 };
 

@@ -1,7 +1,7 @@
 import datetime
+from sqlalchemy import desc
 
 from anarcho.models.token import Token
-
 from anarcho.models.user import User
 from flask.json import jsonify
 import os
@@ -15,7 +15,6 @@ from anarcho.models.build import Build
 from anarcho.models.user_app import UserApp
 from flask import request, Response, make_response, g
 from flask.ext.cors import cross_origin
-from sqlalchemy import desc
 from werkzeug.utils import secure_filename
 from storage_workers import LocalStorageWorker
 
@@ -116,14 +115,37 @@ def builds_list(app_key):
 
 
 @app.route('/api/apps/<app_key>/<int:build_id>', methods=['GET'])
+@cross_origin(headers=['x-auth-token'])
+@login_required
 def get_build(app_key, build_id):
+    build = Build.query.filter_by(app_key=app_key, id=build_id).first()
+    if build:
+        return serialize(build)
+    return make_response('{"error":"build_not_found"}', 404)
+
+
+@app.route('/api/apps/<app_key>/<int:build_id>/notes', methods=['POST'])
+@cross_origin(headers=['x-auth-token', 'Content-Type'])
+@login_required
+@app_permissions(permissions=["w"])
+def update_notes(app_key, build_id):
+    build = Build.query.filter_by(app_key=app_key, id=build_id).first()
+    if build:
+        build.release_notes = request.json['release_notes']
+        db.session.commit()
+        return serialize(build)
+    return make_response('{"error":"build_not_found"}', 404)
+
+
+@app.route('/api/apps/<app_key>/<int:build_id>/file', methods=['GET'])
+def get_build_file(app_key, build_id):
     build = Build.query.filter_by(app_key=app_key, id=build_id).first()
     if build is None:
         return make_response('{"error":"build_not_found"}', 404)
     try:
-        app = Application.query.filter_by(app_key=build.app_key).first()
+        application = Application.query.filter_by(app_key=build.app_key).first()
         upload_date = datetime.datetime.fromtimestamp(build.created_on).strftime('%Y-%m-%d_%H-%M-%S')
-        name = '{proj}_{date}.apk'.format(proj=app.name, date=upload_date)
+        name = '{proj}_{date}.apk'.format(proj=application.name, date=upload_date)
         return send_file(storage_worker.get(build),
                          mimetype='application/vnd.android.package-archive',
                          as_attachment=True,
