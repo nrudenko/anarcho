@@ -76,6 +76,13 @@ def upload(app_key):
         apk_file.save(apk_file_path)
 
         result = parse_apk(apk_file_path, app_key)
+        application = Application.query.filter_by(app_key=app_key).first()
+        package = result["package"]
+        if application and application.package:
+            if application.package != package:
+                return make_response('{"error":"wrong_package"}', 406)
+        elif application:
+            application.package = package
 
         build = result["build"]
         icon_path = result["icon_path"]
