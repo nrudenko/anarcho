@@ -31,4 +31,4 @@ def parse_apk(apk_path, app_key):
     save_icon(apk_file, package, icon_dest)
 
     build = Build(app_key, version_code, version_name)
-    return {"build": build, "icon_path": icon_dest}
+    return {"build": build, "icon_path": icon_dest, "package": package}
