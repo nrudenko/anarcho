@@ -1,5 +1,5 @@
 'use strict';
 
 app.constant('configuration', {
-    API_URL: 'api/'
+    API_URL: 'http://localhost:5000/api/'
 });
