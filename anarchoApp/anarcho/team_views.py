@@ -1,9 +1,10 @@
+import re
 from anarcho import app, db
 from anarcho.serializer import serialize, PermissionSerializer
 from anarcho.models.user import User
 from anarcho.models.user_app import UserApp
 from anarcho.access_manager import app_permissions, login_required, is_permission_allowed
-from flask import request, make_response
+from flask import request, make_response, g
 from flask.ext.cors import cross_origin
 
 
@@ -39,7 +40,10 @@ def get_user_app():
 
 
 def remove_permission(user_app):
-    if user_app:
+    email = request.json['email']
+    if g.user.email == email:
+        return make_response('{"error":"user_can_not_delete_himself"}', 403)
+    elif user_app:
         result = serialize(user_app, PermissionSerializer)
         db.session.delete(user_app)
         db.session.commit()
@@ -49,8 +53,11 @@ def remove_permission(user_app):
 
 
 def update_permission(user_app):
+    email = request.json['email']
     permission = request.json['permission']
-    if not is_permission_allowed(permission):
+    if g.user.email == email:
+        return make_response('{"error":"user_can_not_change_permission"}', 403)
+    elif not is_permission_allowed(permission):
         result = make_response('{"error":"wrong_permission}', 400)
     elif user_app:
         user_app.permission = permission
@@ -65,7 +72,18 @@ def add_user():
     app_key = request.json['app_key']
     email = request.json['email']
     permission = request.json['permission']
+    valid_email_regex = re.match(r'\w[\w\.-]*@\w[\w\.-]+\.\w+', email)
 
+    user = User.query.filter_by(email=email).first()
+    application = None
+    if user is not None:
+        application = UserApp.query.filter_by(app_key=app_key, user_id=user.id).first()
+    if application is not None:
+        return make_response('{"error":"user_with_current_email_already_exist"}', 409)
+    elif len(email) > 25:
+        return make_response('{"error":"invalid_email_length"}', 403)
+    elif valid_email_regex is None:
+        return make_response('{"error":"invalid_email_format"}', 403)
     user = User.query.filter_by(email=email).first()
     if user is None:
         user = User(email)
