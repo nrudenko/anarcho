@@ -6,6 +6,10 @@ from anarcho.models.application import Application
 
 
 class AnarchoTestCase(unittest.TestCase):
+    test_user_email = 'test@mail.com'
+    test_user_name = 'test_name'
+    test_user_password = 'password'
+
     def setUp(self):
         self.token = None
         self.created_app = None
@@ -48,15 +52,15 @@ class AnarchoTestCase(unittest.TestCase):
         return self.app.get(end_point,
                             headers=self.headers)
 
-    def register(self, email='test@mail.com', name='test_name', password='password'):
+    def register(self, email=test_user_email, name=test_user_name, password=test_user_password):
         params = dict(email=email, name=name, password=password)
         return self.post_json('/api/register', params)
 
-    def login(self, email='test@mail.com', password='password'):
+    def login(self, email=test_user_email, password=test_user_password):
         params = dict(email=email, password=password)
         return self.post_json('/api/login', params)
 
-    def make_auth(self, email='test@mail.com', name='test_name', password='password'):
+    def make_auth(self, email=test_user_email, name=test_user_name, password=test_user_password):
         r = self.register(email=email, name=name, password=password)
         self.token = json.loads(r.data)['authToken']
 
@@ -67,19 +71,19 @@ class AnarchoTestCase(unittest.TestCase):
         self.created_app = Application.query.filter_by(app_key=app_key).first()
         return r
 
-    def add_to_team(self, email='test2@mail.com', app_key='app_key', permission='w'):
+    def add_to_team(self, email=test_user_email, app_key='app_key', permission='w'):
         params = {'email': email,
                   'app_key': app_key,
                   'permission': permission}
         return self.post_json('/api/permission', params)
 
-    def update_permission(self, email='test2@mail.com', app_key='app_key', permission='w'):
+    def update_permission(self, email=test_user_email, app_key='app_key', permission='w'):
         params = {'email': email,
                   'app_key': app_key,
                   'permission': permission}
         return self.patch_json('/api/permission', params)
 
-    def remove_permission(self, email='test2@mail.com', app_key='app_key'):
+    def remove_permission(self, email=test_user_email, app_key='app_key'):
         params = {'email': email,
                   'app_key': app_key}
         return self.delete('/api/permission', params)
