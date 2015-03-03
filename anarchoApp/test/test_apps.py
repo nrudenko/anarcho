@@ -32,3 +32,13 @@ class AppsTest(AnarchoTestCase):
         config = json.loads(r.data)
         self.assertTrue('apiToken' in config, 'Plugin config should contain "apiToken"')
         self.assertTrue('uploadUrl' in config, 'Plugin config should contain "uploadUrl"')
+
+    def test_get_app_info(self):
+        self.create_app()
+        app_key = self.created_app.app_key
+        r = self.get_json('api/apps/' + app_key)
+        response_data = json.loads(r.data)
+        self.assertTrue('app_key' in response_data, 'App info should contain "app_key"')
+        self.assertTrue('created_on' in response_data, 'App info should contain "created_on"')
+        self.assertTrue('name' in response_data, 'App info should contain "name"')
+        self.assertTrue('permission' in response_data, 'App info should contain "permission"')

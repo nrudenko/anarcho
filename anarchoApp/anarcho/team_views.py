@@ -23,7 +23,7 @@ def users_list(app_key=None):
 @app_permissions(permissions=["w"])
 def revoke_team_membership():
     if request.method == 'POST':
-        result = add_user()
+        result = add_user_to_team()
     if request.method == 'PATCH':
         result = update_permission(get_user_app())
     if request.method == 'DELETE':
@@ -68,24 +68,23 @@ def update_permission(user_app):
     return result
 
 
-def add_user():
+def add_user_to_team():
     app_key = request.json['app_key']
     email = request.json['email']
     permission = request.json['permission']
-    valid_email_regex = re.match(r'\w[\w\.-]*@\w[\w\.-]+\.\w+', email)
+
+    email_match = re.match(r'\w[\w\.-]*@\w[\w\.-]+\.\w+', email)
+    if len(email) > 25:
+        return make_response('{"error":"invalid_email_length"}', 403)
+    elif not email_match:
+        return make_response('{"error":"invalid_email_format"}', 403)
 
     user = User.query.filter_by(email=email).first()
-    application = None
-    if user is not None:
-        application = UserApp.query.filter_by(app_key=app_key, user_id=user.id).first()
-    if application is not None:
-        return make_response('{"error":"user_with_current_email_already_exist"}', 409)
-    elif len(email) > 25:
-        return make_response('{"error":"invalid_email_length"}', 403)
-    elif valid_email_regex is None:
-        return make_response('{"error":"invalid_email_format"}', 403)
-    user = User.query.filter_by(email=email).first()
-    if user is None:
+    if user:
+        user_app = UserApp.query.filter_by(app_key=app_key, user_id=user.id).first()
+        if user_app:
+            return make_response('{"error":"user_with_current_email_already_exist"}', 409)
+    else:
         user = User(email)
         db.session.add(user)
         db.session.commit()
