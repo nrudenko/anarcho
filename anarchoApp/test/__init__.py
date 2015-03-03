@@ -87,3 +87,7 @@ class AnarchoTestCase(unittest.TestCase):
         params = {'email': email,
                   'app_key': app_key}
         return self.delete('/api/permission', params)
+
+    def assert_error_message(self, response, message):
+        response_data = json.loads(response.data)
+        self.assertTrue(message in response_data['error'], msg='Bad validation error message!')

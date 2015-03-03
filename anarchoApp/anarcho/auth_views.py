@@ -1,20 +1,52 @@
+import re
 from anarcho import app, db
 from anarcho.access_manager import login_required
 from anarcho.models.token import Token
 from anarcho.serializer import serialize
 from anarcho.models.user import User
-from flask import request, g, Response
+from flask import request, g, Response, make_response
 from flask.ext.cors import cross_origin
 
 
 @app.route('/api/register', methods=['POST'])
 @cross_origin(headers=['Content-Type', 'x-auth-token'])
 def register():
-    email = request.json['email']
-    name = request.json['name']
-    password = request.json['password']
+    if 'name' in request.json:
+        name = request.json['name']
+    else:
+        return make_response('{"error":"invalid_user_name"}', 403)
+
+    if name.isspace() or len(name) < 1:
+        return make_response('{"error":"user_name_is_empty"}', 403)
+    elif len(name) > 20:
+        return make_response('{"error":"invalid_user_name_length"}', 403)
+
+    if 'email' in request.json:
+        email = request.json['email']
+    else:
+        return make_response('{"error":"invalid_email"}', 403)
+
+    email_match = re.match(r'\w[\w\.-]*@\w[\w\.-]+\.\w+', email)
+
+    if email.isspace() or len(email) < 1:
+        return make_response('{"error":"email_is_empty"}', 403)
+    elif not email_match:
+        return make_response('{"error":"invalid_email_format"}', 403)
+    elif len(email) > 25:
+        return make_response('{"error":"invalid_email_length"}', 403)
+
+    if 'password' in request.json:
+        password = request.json['password']
+    else:
+        return make_response('{"error":"invalid_password"}', 403)
+
+    if password.isspace():
+        return make_response('{"error":"empty_password"}', 403)
+    elif len(password) < 6:
+        return make_response('{"error":"invalid_password_length"}', 403)
+
     u = User.query.filter(User.email == email).first()
-    if u is None:
+    if not u:
         new_user = User(email, name, password)
         db.session.add(new_user)
         db.session.commit()
