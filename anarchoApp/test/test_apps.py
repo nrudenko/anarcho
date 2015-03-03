@@ -5,7 +5,8 @@ from test import AnarchoTestCase
 class AppsTest(AnarchoTestCase):
     def setUp(self):
         AnarchoTestCase.setUp(self)
-        self.make_auth()
+        self.register()
+        self.login()
 
     def test_apps_list(self):
         self.create_app()

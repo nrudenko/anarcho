@@ -11,7 +11,8 @@ test_team_user_name = 'test_name2'
 class TeamTest(AnarchoTestCase):
     def setUp(self):
         AnarchoTestCase.setUp(self)
-        self.make_auth()
+        self.register()
+        self.login()
         self.register(email=test_team_user_email, name=test_team_user_name)
         self.create_app()
         self.app_key = self.created_app.app_key
@@ -61,3 +62,10 @@ class TeamTest(AnarchoTestCase):
     def test_email_length_validation(self):
         r = self.add_to_team(email='asdcvbnftewscmbpdtv@mail.com', app_key=self.app_key, permission='r')
         self.assert_status_code(r, 403)
+
+    def test_add_existing_user_to_team(self):
+        self.register('test3@mail.com', 'test_name3')
+        self.create_app(app_name='test_app2')
+        self.login()
+        r = self.add_to_team(email='test3@mail.com', app_key=self.app_key, permission='r')
+        self.assert_status_code(r)

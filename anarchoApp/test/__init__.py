@@ -58,11 +58,11 @@ class AnarchoTestCase(unittest.TestCase):
 
     def login(self, email=test_user_email, password=test_user_password):
         params = dict(email=email, password=password)
-        return self.post_json('/api/login', params)
-
-    def make_auth(self, email=test_user_email, name=test_user_name, password=test_user_password):
-        r = self.register(email=email, name=name, password=password)
-        self.token = json.loads(r.data)['authToken']
+        r = self.post_json('/api/login', params)
+        response_data = json.loads(r.data)
+        if 'authToken' in response_data:
+            self.token = response_data['authToken']
+        return r
 
     def create_app(self, app_name='test_app'):
         params = {'name': app_name}
