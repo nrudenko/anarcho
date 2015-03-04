@@ -1,2 +1,3 @@
 recursive-include anarcho/static *
+recursive-include anarcho/templates *
 include requirements.txt

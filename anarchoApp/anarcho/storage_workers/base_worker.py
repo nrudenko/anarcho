@@ -2,7 +2,7 @@ class BaseStorageWorker(object):
     def __init__(self, flask_app):
         self.flask_app = flask_app
 
-    def put(self, build, tmp_apk_path, tmp_icon_path):
+    def put(self, build, tmp_build_path, tmp_icon_path):
         pass
 
     def get(self, build):

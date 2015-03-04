@@ -1,5 +1,5 @@
 'use strict';
 
-app.constant('configuration', {
+app.constant('app_config', {
     API_URL: 'api/'
 });

@@ -2,14 +2,16 @@ from datetime import datetime
 import uuid
 import logging
 
+from flask.ext.cors import cross_origin
 from os.path import expanduser
 import os
-from anarcho.storage_workers import storage_types
 from flask.ext.sqlalchemy import SQLAlchemy
-from flask import Flask, redirect, request
+from flask import Flask, redirect, request, Response, send_file
 
 
 app = Flask(__name__, static_url_path="")
+
+from anarcho.storage_workers import storage_types
 
 
 def init_config():
@@ -55,12 +57,26 @@ def pre_request_logging():
     )
 
 
-from anarcho import apps_views, auth_views, tracking_views, team_views
+from anarcho import apps_views, build_views, upload_view, auth_views, tracking_views, team_views
 
 
 @app.route('/')
 def index():
     return app.send_static_file("index.html")
+
+
+@app.route('/api/cert', methods=['GET'])
+@cross_origin(headers=['x-auth-token'])
+def cert():
+    return send_file(app.config['SSL_PATH']['crt'],
+                     mimetype='application/x-x509-server-cert',
+                     as_attachment=True)
+
+
+@app.route('/api/ping', methods=['GET'])
+@cross_origin(headers=['x-auth-token'])
+def ping():
+    return Response(status=200)
 
 
 @app.errorhandler(404)

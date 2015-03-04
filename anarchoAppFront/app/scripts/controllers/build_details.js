@@ -1,35 +1,25 @@
-var buildDetailsCtrl = function ($rootScope, $scope, $routeParams, AppsService, UrlService, ngToast, PermissionService) {
+var buildDetailsCtrl = function ($rootScope, $scope, $routeParams, AppsService, ngToast, PermissionService, app_config) {
     PermissionService.extend($scope);
-
-    $scope.app = {}
+    console.log(app_config);
+    $scope.certLink = app_config.API_URL + 'cert';
+    $scope.app = {};
     $scope.buildId = $routeParams.build_id;
     $scope.appKey = $routeParams.app_key;
-
     $scope.editNotesDisabled = true;
 
     $scope.getBuild = function () {
         AppsService.getBuild($scope.appKey, $scope.buildId).then(function (res) {
             $scope.build = res.data;
-            if ($scope.build) {
-                $scope.buildUrl = UrlService.getBuildUrl($scope.appKey, $scope.build);
-            }
             $rootScope.hideLoader();
         });
     };
-
-    $scope.getApp = function () {
-        AppsService.get($scope.appKey).then(function (res) {
-            $scope.app = res.data;
-        });
-    };
-
 
     $scope.editNotes = function () {
         $scope.editNotesDisabled = false;
     };
 
     $scope.linkCopied = function () {
-        ngToast.create('Link ' + $scope.buildUrl + ' copied');
+        ngToast.create('Link ' + $scope.build.build_url + ' copied');
     };
 
     $scope.saveNotes = function () {
@@ -45,9 +35,18 @@ var buildDetailsCtrl = function ($rootScope, $scope, $routeParams, AppsService, 
     };
 
     $rootScope.showLoader();
-    $scope.getBuild();
-    $scope.getApp();
+    AppsService.get($scope.appKey).then(function (res) {
+            $scope.app = res.data;
+            if ($scope.app.app_type === 'ios') {
+                $scope.iosApp = true;
+            } else {
+                $scope.iosApp = false;
+            }
+            $scope.getBuild();
+        }
+    );
+
 };
 
-app.controller("BuildDetailsCtrl", ['$rootScope', '$scope', '$routeParams', 'AppsService', 'UrlService', 'ngToast',
-    'PermissionService', buildDetailsCtrl]);
+app.controller("BuildDetailsCtrl", ['$rootScope', '$scope', '$routeParams', 'AppsService', 'ngToast',
+    'PermissionService', 'app_config', buildDetailsCtrl]);

@@ -340,6 +340,12 @@ module.exports = function (grunt) {
                             cwd: '.tmp/images',
                             dest: '<%= yeoman.dist %>/images',
                             src: ['generated/*']
+                        },
+                        {
+                            expand: true,
+                            cwd: process.cwd(),
+                            dest: '<%= yeoman.dist %>',
+                            src: ['bower_components/zeroclipboard/dist/ZeroClipboard.swf']
                         }
                     ]
                 },

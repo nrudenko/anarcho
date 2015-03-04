@@ -1,7 +1,7 @@
 import time
+from sqlalchemy import Column, Integer, String, ForeignKey
 
 from anarcho import db
-from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship, backref
 
 
@@ -25,4 +25,3 @@ class Build(db.Model):
 
     def __repr__(self):
         return '<Build %r>' % self.app_key
-

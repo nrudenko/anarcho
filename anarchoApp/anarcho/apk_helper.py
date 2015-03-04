@@ -28,7 +28,10 @@ def parse_apk(apk_path, app_key):
     version_name = apk_file.get_androidversion_name()
 
     icon_dest = os.path.join(os.path.dirname(apk_path), "%s_icon.png" % app_key)
-    save_icon(apk_file, package, icon_dest)
-
+    try:
+        save_icon(apk_file, package, icon_dest)
+    except:
+        print icon_dest, 'not saved'
+        icon_dest = None
     build = Build(app_key, version_code, version_name)
     return {"build": build, "icon_path": icon_dest, "package": package}

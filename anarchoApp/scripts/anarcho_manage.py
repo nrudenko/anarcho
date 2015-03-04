@@ -2,18 +2,26 @@
 
 Usage:
     anarcho init [<CONFIG_FILE>]
-    anarcho (start | stop | restart | init_db | stub_db)
+    anarcho (start | stop | restart)
+    anarcho (init_db | stub_db)
     anarcho start -t
+    anarcho gen_cert <HOST> [<CERT_NAME>]
 
 Options:
     --nodaemon -t  Start as no daemon
 
 """
 import shutil
+
+from docopt import docopt
+
 from os.path import expanduser
 import os
 
-from docopt import docopt
+
+anarcho_dir = os.path.join(expanduser("~"), ".anarcho")
+
+pid_file_path = os.path.join(anarcho_dir, 'anarcho.pid')
 
 
 def try_backup_existing_config(config_path):
@@ -27,7 +35,7 @@ def try_backup_existing_config(config_path):
 
 
 def init_config(config_src):
-    config_path = os.path.join(expanduser("~"), ".anarcho", "config.py")
+    config_path = os.path.join(anarcho_dir, "config.py")
     config_dst = config_path
     if config_src is None:
         import config_module
@@ -102,9 +110,6 @@ def drop_session(email):
     db.session.commit()
 
 
-pid_file_path = 'anarcho.pid'
-
-
 def start():
     from anarcho import anarcho_cherry
 
@@ -125,13 +130,43 @@ def stop():
 
 def restart():
     stop()
-    start()
+    start_d()
+
+
+def start_d():
+    from daemonize import Daemonize
+
+    daemon = Daemonize(app="anarcho", pid=pid_file_path, action=start)
+    print "Anarcho started..."
+    daemon.start()
+
+
+def gen_cert(host, name):
+    if not name:
+        name = 'anarcho_server'
+
+    key_path = os.path.join(anarcho_dir, name + '.key')
+    crt_path = os.path.join(anarcho_dir, name + '.crt')
+    params = {'key_path': key_path, 'crt_path': crt_path, 'host': host}
+
+    gen_key = 'openssl genrsa -out {key_path} 2048'.format(**params)
+    gen_crt = 'openssl req -new -x509 -key {key_path} -out {crt_path} -days 365 -subj /CN={host}' \
+        .format(**params)
+    import subprocess
+
+    p = subprocess.Popen(gen_key.split(), stdout=subprocess.PIPE)
+    print p.communicate()[0]
+    p = subprocess.Popen(gen_crt.split(), stdout=subprocess.PIPE)
+    print p.communicate()[0]
+    if os.path.exists(key_path) and os.path.exists(key_path):
+        print 'Generated for {host}:\n\t\t{key_path}\n\t\t{crt_path}' \
+            .format(**params)
+    else:
+        print 'Not generated'
 
 
 def main():
     args = docopt(__doc__)
-    if args['stub_db']:
-        stub_db()
     if args['init']:
         init(args['<CONFIG_FILE>'])
         pass
@@ -139,18 +174,19 @@ def main():
         if args['--nodaemon']:
             start()
         else:
-            from daemonize import Daemonize
-
-            daemon = Daemonize(app="anarcho", pid=pid_file_path, action=start)
-            print "Anarcho started..."
-            daemon.start()
+            start_d()
         pass
     if args['stop']:
         stop()
         pass
     if args['restart']:
-        stop()
+        restart()
         pass
+    if args['stub_db']:
+        stub_db()
     if args['init_db']:
         init_db()
+        pass
+    if args['gen_cert']:
+        gen_cert(args['<HOST>'], args['<CERT_NAME>'])
         pass

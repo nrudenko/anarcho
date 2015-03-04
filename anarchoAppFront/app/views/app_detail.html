@@ -4,9 +4,10 @@
      ng-file-drag-over-class="upload-dragover"
      ng-file-drag-over-delay="100"
      ng-controller="AppDetailsCtrl"
-     ng-if="!$rootScope.isLoading()">
+     ng-if="!$rootScope.isLoading()"
+     style="min-height: 85vh;">
 
-    <p class="text-center text-info"><b class="btn-default" ng-file-select="onFileSelect($files)">Select</b> or drop APK
+    <p class="text-center text-info"><b class="btn-default" ng-file-select="onFileSelect($files)">Select</b> or drop apk/ipa
         here for
         upload...</p>
 
@@ -24,10 +25,10 @@
         <tr>
             <th ng-if="canWrite()"></th>
             <th>
-                <order-btn field='version_code' text="Version Code"/>
+                <order-btn field='version_name' text="Version Name"/>
             </th>
             <th>
-                <order-btn field='version_name' text="Version Name"/>
+                <order-btn field='version_code' text="Version Code"/>
             </th>
             <th>Release notes</th>
             <th>
@@ -42,8 +43,8 @@
                         ng-click="toggleBuild(b.id)"
                         >
             </td>
-            <td ng-click="showBuildInfo(b)">{{ b.version_code }}</td>
             <td ng-click="showBuildInfo(b)">{{ b.version_name }}</td>
+            <td ng-click="showBuildInfo(b)">{{ b.version_code }}</td>
             <td ng-click="showBuildInfo(b)" style="text-align: left;">{{ b.release_notes | addEllipsis : 30 }}</td>
             <td ng-click="showBuildInfo(b)" style="white-space: nowrap;">{{ b.created_on * 1000 | date : 'yyyy-MM-dd HH:mm:ss' }}</td>
         </tr>

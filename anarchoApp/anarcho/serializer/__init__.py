@@ -1,5 +1,6 @@
 from collections import Iterable
 
+from anarcho import storage_worker
 from anarcho.models.application import Application
 from anarcho.models.build import Build
 from anarcho.models.token import Token
@@ -35,15 +36,16 @@ class Serializer(object):
 
 
 class AppSerializer(Serializer):
-    __json_fields__ = {"package", "app_key", "icon_url", "created_on", "name", "permission"}
+    __json_fields__ = {"package", "app_key", "icon_url", "created_on", "name", "permission", "app_type"}
 
     def __init__(self, user_app):
         self.app_key = user_app.app.app_key
         self.package = user_app.app.package
         self.name = user_app.app.name
-        self.icon_url = user_app.app.icon_url
+        self.icon_url = storage_worker.get_icon_link(self.app_key)
         self.created_on = user_app.app.created_on
         self.permission = user_app.permission
+        self.app_type = user_app.app.app_type
 
 
 class UserSerializer(Serializer):
@@ -73,8 +75,9 @@ class PermissionSerializer(Serializer):
     __json_fields__ = {"username", "email", "permission"}
 
     def __init__(self, user_app):
-        self.username = user_app.user.name
-        self.email = user_app.user.email
+        if user_app.user:
+            self.username = user_app.user.name
+            self.email = user_app.user.email
         self.permission = user_app.permission
 
 

@@ -1,9 +1,9 @@
-var api = function ($http, $upload, configuration, Session) {
+var api = function ($http, $upload, app_config, Session) {
     var api = {};
 
     api.getBaseConfig = function (action) {
         var config = {
-            url: configuration.API_URL + action,
+            url: app_config.API_URL + action,
             headers: {}
         };
 
@@ -68,4 +68,4 @@ var api = function ($http, $upload, configuration, Session) {
     return api;
 };
 
-app.factory('Api', ['$http', '$upload', 'configuration', 'Session', api]);
+app.factory('Api', ['$http', '$upload', 'app_config', 'Session', api]);

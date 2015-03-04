@@ -31,6 +31,15 @@ app.config(['ngClipProvider', function (ngClipProvider) {
 
 }]);
 
+app.config([
+    '$compileProvider',
+    function ($compileProvider) {
+        $compileProvider.
+            aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|chrome-extension|itms-services):/);
+    }
+]);
+
+
 app.filter('addEllipsis', function () {
     return function (input, scope) {
         var maxCol = scope;

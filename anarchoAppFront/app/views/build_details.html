@@ -1,46 +1,59 @@
 <div ng-controller="BuildDetailsCtrl" style="padding-bottom: 60px">
-    <p><a href="#/apps/{{ appKey }}/">&#8592; to list</a></p>
-    <b>Version: </b>{{ build.version_name }}({{ build.version_code }})
-    <br>
-    <b>Upload date: </b>{{ build.created_on * 1000 | date : 'yyyy-MM-dd HH:mm:ss' }}
-    <br>
-    <br>
-
-    <div class="container-fluid">
-        <div class="col-sm-10 form-group" style="padding-left: 3px; padding-right: 3px;">
-            <textarea ng-model="build.release_notes" msd-elastic
-                      id="release_notes"
-                      style="resize: vertical;"
-                      ng-disabled="editNotesDisabled"
-                      focus-on="!editNotesDisabled"
-                      class="form-control"
-                    ></textarea>
-        </div>
-        <div class="col-sm-2" style="padding-left: 3px; padding-right: 3px;" ng-if="canWrite()">
-            <div class="btn btn-danger" ng-click="editNotes()" ng-show="editNotesDisabled" style="width: 100%;">
-                Edit
-            </div>
-            <div class="btn btn-success" ng-click="saveNotes()" ng-show="!editNotesDisabled" style="width: 100%;">
-                Save
-            </div>
-        </div>
+    <div data-ng-if="build">
+        <p><a href="#/apps/{{ appKey }}/">&#8592; to list</a></p>
+        <b>Version: </b>{{ build.version_name }}({{ build.version_code }})
+        <br>
+        <b>Upload date: </b>{{ build.created_on * 1000 | date : 'yyyy-MM-dd HH:mm:ss' }}
+        <br>
         <br>
 
-        <div class="col-sm-10 form-group" style="padding-left: 3px; padding-right: 3px;">
-            <input id="link" type="url" class="form-control text-center" value="{{ buildUrl }}"
-                   onClick="this.setSelectionRange(0, this.value.length)" >
-        </div>
-        <div class="col-sm-2" style="padding-left: 2px; padding-right: 2px;">
-            <div class="btn btn-info" clip-copy="buildUrl" clip-click="linkCopied()" style="width: 100%; ">Copy link</div>
-        </div>
-        <br>
-    </div>
-    <div class="text-center">
-        <a class="btn btn-success" href="{{ buildUrl }}" style="padding: 15px;">DOWNLOAD</a>
-        <br><br>
+        <div class="container-fluid">
+            <div class="col-sm-10 form-group" style="padding-left: 3px; padding-right: 3px;">
+                <textarea ng-model="build.release_notes"
+                          ng-disabled="editNotesDisabled"
+                          focus-on="!editNotesDisabled"
+                          msd-elastic
+                          class="form-control"
+                        ></textarea>
+            </div>
+            <div ng-if="canWrite()" class="col-sm-2" style="padding-left: 3px; padding-right: 3px;">
+                <div class="btn btn-danger" ng-click="editNotes()" ng-show="editNotesDisabled" style="width: 100%;">
+                    Edit
+                </div>
+                <div class="btn btn-success" ng-click="saveNotes()" ng-show="!editNotesDisabled" style="width: 100%;">
+                    Save
+                </div>
+            </div>
+            <br>
 
-        <div data-ng-if="buildUrl">
-            <qr text="buildUrl" size="128" image="true"></qr>
+            <div class="col-sm-10 form-group" style="padding-left: 3px; padding-right: 3px;">
+                <input id="link" type="url"
+                       class="form-control text-center"
+                       value="{{ build.build_url }}"
+                       onClick="this.setSelectionRange(0, this.value.length)">
+            </div>
+            <div class="col-sm-2" style="padding-left: 2px; padding-right: 2px;">
+                <div class="btn btn-info" clip-copy="build.build_url" clip-click="linkCopied()"
+                     style="width: 100%; ">
+                    Copy
+                    link
+                </div>
+            </div>
+            <br>
+        </div>
+        <div class="text-center">
+            <div ng-show="iosApp">
+                <p class="text-center">Download and open for install
+                    <b><a ng-href="{{ certLink }}">certificate</a></b> if you got connection error. Do it once.</p>
+                <br>
+                <a ng-href="{{ build.install_url }}" class="btn btn-success" style="padding: 15px;">INSTALL</a>
+                <br><br>
+                <qr data-ng-if="build.install_url" text="build.install_url" size="128" image="true"></qr>
+            </div>
+            <div ng-show="!iosApp">
+                <a ng-href="{{ build.build_url }}" class="btn btn-success" style="padding: 15px;">DOWNLOAD</a><br><br>
+                <qr data-ng-if="build.build_url" text="build.build_url" size="128" image="true"></qr>
+            </div>
         </div>
     </div>
 
