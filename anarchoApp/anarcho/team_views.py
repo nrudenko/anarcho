@@ -11,7 +11,7 @@ from flask.ext.cors import cross_origin
 @app.route('/api/permission/<app_key>', methods=['GET'])
 @cross_origin(headers=['x-auth-token'])
 @login_required
-@app_permissions(permissions=["w"])
+@app_permissions(permissions=["r", "w"])
 def users_list(app_key=None):
     user_apps = UserApp.query.filter(UserApp.app_key == app_key, UserApp.permission != 'u').all()
     return serialize(user_apps, serializer=PermissionSerializer)

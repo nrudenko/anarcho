@@ -1,4 +1,9 @@
 <div ng-controller="AppRemoveCtrl">
-    Remove app <b>{{app.name}}</b>
-    Coming soon... ))
+    <br><br>
+    If you click on YES you will call Diablo and loose all <b>{{app.name}}'s</b> data. Are you ready to do this?!
+    <br><br>
+    <div>
+        <a id="no" class="btn btn-primary" ng-href="#/settings/{{app.app_key}}">No</a>
+        <a id="yes" class="btn btn-danger" ng-click="removeApp()">Yes</a>
+    </div>
 </div>

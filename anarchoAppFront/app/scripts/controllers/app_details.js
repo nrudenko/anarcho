@@ -26,7 +26,6 @@ var appDetailsCtrl = function ($rootScope, $scope, $modal, $timeout, $routeParam
 
     $scope.onFileSelect = function ($files) {
         var file = $files[0];
-
         $scope.upload = AppsService.uploadBuild(
             $scope.appKey,
             file,
@@ -38,6 +37,7 @@ var appDetailsCtrl = function ($rootScope, $scope, $modal, $timeout, $routeParam
                 $timeout(function () {
                     $scope.progress = -1;
                 }, 1000);
+                $scope.getApp($scope.appKey);
             });
 
         //.error(...)
@@ -54,7 +54,7 @@ var appDetailsCtrl = function ($rootScope, $scope, $modal, $timeout, $routeParam
     $scope.remove = function () {
         AppsService.removeBuilds($scope.appKey, $scope.ids).then(function (res) {
             $scope.ids = [];
-            $scope.init()
+            $scope.buildsList($scope.appKey);
         })
     };
 

@@ -51,6 +51,18 @@ def app_create():
     return serialize(user_app)
 
 
+@app.route('/api/apps/<app_key>', methods=['DELETE'])
+@cross_origin(headers=['x-auth-token', 'Content-Type'], methods=['DELETE'])
+@login_required
+@app_permissions(permissions=["w"])
+def remove_application(app_key):
+    application = Application.query.filter_by(app_key=app_key).first()
+    if application:
+        db.session.delete(application)
+    db.session.commit()
+    return Response(status=200)
+
+
 @app.route('/api/apps/<app_key>', methods=['GET'])
 @cross_origin(headers=['x-auth-token'])
 @login_required

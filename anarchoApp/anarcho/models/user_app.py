@@ -1,6 +1,6 @@
 from anarcho import db
 from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 
 
 class UserApp(db.Model):
@@ -11,8 +11,8 @@ class UserApp(db.Model):
     app_key = Column('app_key', String, ForeignKey('apps.app_key'))
     permission = Column('permission', String)  # r/w/u
 
-    user = relationship("User", backref='users_apps')
-    app = relationship("Application", backref='users_apps')
+    user = relationship("User", backref='users')
+    app = relationship("Application", backref=backref("users_apps", cascade="all,delete"))
 
     def __init__(self, user_id, app_key, permission):
         self.user_id = user_id

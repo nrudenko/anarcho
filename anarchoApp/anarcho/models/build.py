@@ -1,17 +1,20 @@
 import time
 
 from anarcho import db
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship, backref
 
 
 class Build(db.Model):
     __tablename__ = "builds"
     id = Column('build_id', Integer, primary_key=True)
-    app_key = Column('app_key', String)
+    app_key = Column('app_key', String, ForeignKey('apps.app_key'))
     version_code = Column('version_code', Integer)
     version_name = Column('version_name', String)
     release_notes = Column('release_notes', String)
     created_on = Column('created_on', Integer)
+
+    app = relationship("Application", backref=backref("builds", cascade="all,delete"))
 
     def __init__(self, app_key, version_code, version_name, release_notes=None):
         self.app_key = app_key

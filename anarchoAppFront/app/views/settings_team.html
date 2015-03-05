@@ -13,17 +13,18 @@
                         ng-model="u.permission"
                         ng-options="p.id as p.name for p in all_permissions"
                         ng-change="updateUser(u)"
+                        ng-disabled="!canWrite()"
                         >
                 </select>
             </td>
-            <td>
+            <td ng-show="canWrite()">
                 <a class="btn btn-danger" ng-click="revokeUser(u)">Remove</a>
             </td>
         </tr>
     </table>
 
     <hr>
-    <form name="addUserForm" ng-submit="addUser(user_app)" novalidate>
+    <form name="addUserForm" ng-show="canWrite()" ng-submit="addUser(user_app)" novalidate>
         <div class="form-inline text-right" ng-init="user_app.app_key=app.app_key;user_app.permission='r'">
             <label>Invite user to {{app.name}}: </label>
             <input class="form-control" type="text" id="username"
