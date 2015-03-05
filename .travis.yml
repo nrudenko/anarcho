@@ -5,7 +5,7 @@ install:
 - cd anarchoApp
 - python setup.py -q install
 - anarcho init
-script: python -m unittest discover test
+script: python -m unittest discover api_tests
 notifications:
   slack:
     secure: KrVZML0+7JPDfTCH/L8LF1MRZKfzmUA7LItlgHyLVOyp4qHPnU4Yz7e4XD878ngG/nQU5y863QsJQinAvYq6iIccnUk+UFb7/0W92nBWVANL/Mo6M/scnQrR0a70WlMKHGMAdQqSwmH93D7cxOMtiUS8zWCPS2lFHantZ31yx7I=

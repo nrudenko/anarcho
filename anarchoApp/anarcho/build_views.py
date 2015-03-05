@@ -15,7 +15,7 @@ from flask.templating import render_template
 @cross_origin(headers=['x-auth-token', 'Content-Type'], methods=['DELETE'])
 @login_required
 @app_permissions(permissions=["w"])
-def remove_build(app_key):
+def delete_builds_list(app_key):
     ids = request.json['ids']
     builds = Build.query.filter(Build.app_key == app_key, Build.id.in_(ids)).all()
     for b in builds:
@@ -56,7 +56,7 @@ def get_build(app_key, build_id):
 @cross_origin(headers=['x-auth-token', 'Content-Type'])
 @login_required
 @app_permissions(permissions=["w"])
-def update_notes(app_key, build_id):
+def update_build_notes(app_key, build_id):
     build = Build.query.filter_by(app_key=app_key, id=build_id).first()
     if build:
         build.release_notes = request.json['release_notes']
@@ -94,7 +94,7 @@ def get_build_file(app_key, build_id):
 
 
 @app.route('/api/apps/<app_key>/<int:build_id>/plist', methods=['GET'])
-def get_plist(app_key, build_id):
+def get_build_plist(app_key, build_id):
     application = Application.query.filter_by(app_key=app_key).first()
     if not application:
         return make_response('{"error":"app_not_found"}', 404)

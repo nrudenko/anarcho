@@ -1,5 +1,5 @@
 import json
-from test import AnarchoTestCase
+from api_tests import AnarchoTestCase
 
 test_user_email = 'test2@mail.com'
 test_user_name = 'test_user2'
@@ -36,7 +36,7 @@ class AuthTest(AnarchoTestCase):
         self.register()
         r = self.login()
         response_data = json.loads(r.data)
-        r = self.get_json('/api/user', response_data['authToken'])
+        r = self.do_get('/api/user', response_data['authToken'])
         self.assert_status_code(r)
 
     def test_registration_with_empty_name(self):

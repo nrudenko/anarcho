@@ -14,13 +14,16 @@ app = Flask(__name__, static_url_path="")
 from anarcho.storage_workers import storage_types
 
 
-def init_config():
+default_config_path = os.path.join(expanduser("~"), ".anarcho", "config.py")
+
+
+def init_config(config_path=default_config_path):
     app.config.update({'SECRET_KEY': str(uuid.uuid4())})
-    default_config_path = os.path.join(expanduser("~"), ".anarcho", "config.py")
-    if os.path.exists(default_config_path):
-        app.config.from_pyfile(default_config_path)
+    if os.path.exists(config_path):
+        app.config.from_pyfile(config_path)
     else:
-        raise ValueError("Configuration file does not exist. Use 'anarcho init' to initialize the file.")
+        raise ValueError("Configuration file {0} does not exist. "
+                         "Use 'anarcho init' to initialize the file.".format(config_path))
 
 
 def create_folders():
@@ -47,7 +50,7 @@ access_log_handler.setLevel(logging.NOTSET)
 app.logger.addHandler(access_log_handler)
 
 
-@app.before_request
+# @app.before_request
 def pre_request_logging():
     app.logger.info('  '.join([
         datetime.today().ctime(),

@@ -1,4 +1,4 @@
-from test import AnarchoTestCase
+from api_tests import AnarchoTestCase
 
 from anarcho.models.user import User
 from anarcho.models.user_app import UserApp
