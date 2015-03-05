@@ -80,10 +80,13 @@ def app_permissions(permissions=[]):
                                  " app_key in args or in request.json")
             user = g.user
             result = make_response('{"error":"not_enough_permission"}', 403)
-            if user is not None:
+            if user:
                 user_app = UserApp.query.filter_by(app_key=app_key, user_id=user.id).first()
-                if user_app.permission in permissions:
-                    result = func(*args, **kwargs)
+                if user_app:
+                    if user_app.permission in permissions:
+                        result = func(*args, **kwargs)
+                else:
+                    result = make_response('{"error":"app_not_found"}', 404)
             return result
 
         return decorated_view

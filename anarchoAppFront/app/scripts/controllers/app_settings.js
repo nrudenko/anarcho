@@ -34,9 +34,7 @@ var AppSettingsCtrl = function ($scope, $routeParams, AppsService) {
     $scope.getApp = function (appKey) {
         AppsService.get(appKey).then(function (res) {
             $scope.app = res.data;
-            if ($scope.canWrite()) {
-                $scope.action = "team";
-            }
+            $scope.action = "team";
         });
     };
 

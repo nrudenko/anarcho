@@ -9,6 +9,10 @@ var AppsService = function (Api) {
         return Api.post('apps', app);
     };
 
+    appService.removeApp = function (appKey) {
+        return Api.delete('apps/' + appKey);
+    };
+
     appService.get = function (appKey) {
         return Api.get('apps/' + appKey);
     };
