@@ -12,7 +12,7 @@ PUBLIC_HOST = 'http://{0}:{1}'.format(HOST, PORT)
 PUBLIC_HOST_SECURE = 'https://{0}:{1}'.format(HOST, PORT_SECURE)
 
 SSL_PATH = {
-    'crt': join(anarcho_dir, 'anarcho_server.cer'),
+    'crt': join(anarcho_dir, 'anarcho_server.crt'),
     'key': join(anarcho_dir, 'anarcho_server.key')
 }
 

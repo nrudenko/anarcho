@@ -24,8 +24,9 @@ var appDetailsCtrl = function ($rootScope, $scope, $modal, $timeout, $routeParam
         });
     };
 
-    $scope.onFileSelect = function ($files) {
-        var file = $files[0];
+
+    $scope.onFileSelect = function (files) {
+        var file = files[0];
         $scope.upload = AppsService.uploadBuild(
             $scope.appKey,
             file,

@@ -43,8 +43,10 @@
         </div>
         <div class="text-center">
             <div ng-show="iosApp">
-                <p class="text-center">Download and open for install
-                    <b><a ng-href="{{ certLink }}">certificate</a></b> if you got connection error. Do it once.</p>
+                <p class="text-center">
+                    If you got connection error when installing build,
+                    you should download and install <b><a ng-href="{{ certLink }}">certificate</a></b>.
+                </p>
                 <br>
                 <a ng-href="{{ build.install_url }}" class="btn btn-success" style="padding: 15px;">INSTALL</a>
                 <br><br>
