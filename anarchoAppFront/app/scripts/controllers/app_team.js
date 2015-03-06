@@ -8,8 +8,11 @@ var AppTeamCtrl = function ($scope, SettingsService) {
 
     $scope.addUser = function (permission) {
         permission.app_key = $scope.app.app_key;
-        SettingsService.add(permission).success(function (data) {
-            $scope.permissions.push(data);
+        SettingsService.add(permission).then(function (data) {
+            $scope.permissions.push(data.data);
+            $scope.error = null;
+        }, function (error) {
+            $scope.error = error.data.error;
         });
     };
 
