@@ -1,5 +1,5 @@
 'use strict';
-var appDetailsCtrl = function ($rootScope, $scope, $modal, $timeout, $routeParams, AppsService, $location, PermissionService) {
+var appDetailsCtrl = function ($rootScope, $scope, $modal, $timeout, $routeParams, AppsService, $location, PermissionService, ngToast) {
 
     PermissionService.extend($scope);
 
@@ -27,24 +27,26 @@ var appDetailsCtrl = function ($rootScope, $scope, $modal, $timeout, $routeParam
 
     $scope.onFileSelect = function (files) {
         var file = files[0];
-        $scope.upload = AppsService.uploadBuild(
+
+        AppsService.uploadBuild(
             $scope.appKey,
             file,
-            function (progress) {
+            function(progress) {
                 $scope.progress = progress;
-            },
-            function (data) {
-                $scope.builds.push(data);
-                $timeout(function () {
-                    $scope.progress = -1;
-                }, 1000);
-                $scope.getApp($scope.appKey);
+            }
+        ).then(function(data) {
+            $scope.builds.push(data);
+            $scope.getApp($scope.appKey);
+        }).catch(function(xhr) {
+            ngToast.create({
+                content: xhr.data.error,
+                className: 'danger'
             });
-
-        //.error(...)
-        //.then(success, error, progress);
-        // access or attach event listeners to the underlying XMLHttpRequest.
-        //.xhr(function(xhr){xhr.upload.addEventListener(...)})
+        }).finally(function() {
+            $timeout(function() {
+                $scope.progress = -1;
+            }, 1000);
+        });
     };
 
     $scope.showBuildInfo = function (build) {
@@ -77,6 +79,6 @@ var appDetailsCtrl = function ($rootScope, $scope, $modal, $timeout, $routeParam
 };
 
 app.controller("AppDetailsCtrl", ['$rootScope', '$scope', '$modal', '$timeout', '$routeParams', 'AppsService',
-    '$location', 'PermissionService', appDetailsCtrl]);
+    '$location', 'PermissionService', 'ngToast', appDetailsCtrl]);
 
 

@@ -22,7 +22,7 @@ var AppsService = function (Api) {
     };
 
     appService.uploadBuild = function (appKey, file, progress, success) {
-        Api.uploadBuild('apps/' + appKey, file, progress, success);
+        return Api.uploadBuild('apps/' + appKey, file, progress, success);
     };
 
     appService.removeBuilds = function (appKey, ids) {

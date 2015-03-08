@@ -15,6 +15,8 @@ def get_app_type(filename):
         app_type = IOS
     elif "apk" in filename:
         app_type = ANDR
+    else:
+        raise TypeError('Unknown file type. Supported types: ipa, apk.')
     return app_type
 
 
@@ -36,17 +38,23 @@ def upload(app_key):
         else:
             return make_response('{"error":"build_file_absent"}', 406)
 
-        app_type = get_app_type(filename)
+        try:
+            app_type = get_app_type(filename)
+        except TypeError:
+            return make_response('{"error":"wrong_file_extension"}', 406)
 
         if not application.app_type:
             application.app_type = app_type
         elif application.app_type != app_type:
             return make_response('{"error":"wrong_app_type"}', 406)
 
-        if app_type == ANDR:
-            result = parse_apk(file_path, app_key)
-        elif app_type == IOS:
-            result = parse_ipa(file_path, app_key)
+        try:
+            if app_type == ANDR:
+                result = parse_apk(file_path, app_key)
+            elif app_type == IOS:
+                result = parse_ipa(file_path, app_key)
+        except Exception:
+            return make_response('{"error":"invalid_file_format"}', 406)
 
         package = result["package"]
         icon_path = result["icon_path"]
