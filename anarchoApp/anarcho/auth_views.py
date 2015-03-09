@@ -22,7 +22,7 @@ def register():
         return make_response('{"error":"invalid_user_name_length"}', 403)
 
     if 'email' in request.json:
-        email = request.json['email']
+        email = request.json['email'].lower()
     else:
         return make_response('{"error":"invalid_email"}', 403)
 
@@ -46,12 +46,19 @@ def register():
         return make_response('{"error":"invalid_password_length"}', 403)
 
     u = User.query.filter(User.email == email).first()
-    if not u:
-        new_user = User(email, name, password)
-        db.session.add(new_user)
-        db.session.commit()
+    if not u or not u.name:
+        user = None
+        if not u:
+            user = User(email, name, password)
+            db.session.add(user)
+            db.session.commit()
+        else:
+            user = u
+            user.name = name
+            user.password = password
+            db.session.commit()
 
-        token = Token(new_user)
+        token = Token(user)
         db.session.add(token)
         db.session.commit()
         return serialize(token)
@@ -62,7 +69,7 @@ def register():
 @app.route('/api/login', methods=['POST'])
 @cross_origin(headers=['Content-Type', 'x-auth-token'])
 def login():
-    email = request.json['email']
+    email = request.json['email'].lower()
     password = request.json['password']
     u = User.query.filter(User.email == email).first()
     if u is not None:

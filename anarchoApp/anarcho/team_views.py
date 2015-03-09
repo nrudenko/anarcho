@@ -53,9 +53,9 @@ def remove_permission(user_app):
 
 
 def update_permission(user_app):
-    email = request.json['email']
+    email = request.json['email'].lower()
     permission = request.json['permission']
-    if g.user.email == email:
+    if g.user.email.lower() == email:
         return make_response('{"error":"user_can_not_change_permission"}', 403)
     elif not is_permission_allowed(permission):
         result = make_response('{"error":"wrong_permission}', 400)
@@ -70,7 +70,11 @@ def update_permission(user_app):
 
 def add_user_to_team():
     app_key = request.json['app_key']
-    email = request.json['email']
+    email = None
+    if 'email' in request.json:
+        email = request.json['email'].lower()
+    else:
+        return make_response('{"error":"invalid_email"}', 403)
     permission = request.json['permission']
 
     email_match = re.match(r'\w[\w\.-]*@\w[\w\.-]+\.\w+', email)

@@ -69,3 +69,21 @@ class TeamTest(AnarchoTestCase):
         self.login()
         r = self.add_to_team(email='test3@mail.com', app_key=self.app_key, permission='r')
         self.assert_status_code(r)
+
+    def test_add_user_with_insensitive_email_to_team(self):
+        email = 'tESt3@mail.com'
+        self.register(email=email, name='test_name3')
+        self.create_app(app_name='test_app2')
+        self.login()
+        r = self.add_to_team(email=email.lower(), app_key=self.app_key, permission='r')
+        self.assert_status_code(r)
+
+    def test_register_user_after_adding_to_team(self):
+        email = 'test4@mail.com'
+        self.login()
+        r = self.add_to_team(email=email, app_key=self.app_key, permission='r')
+        self.assert_status_code(r)
+        r = self.register(email=email, name='test_name4')
+        self.assert_status_code(r)
+        r = self.login()
+        self.assert_status_code(r)

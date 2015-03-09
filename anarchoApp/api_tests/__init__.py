@@ -84,7 +84,6 @@ class AnarchoTestCase(AnarchoREST):
         self.created_app = Application.query.filter_by(app_key=app_key).first()
         return r
 
-
     def add_to_team(self, email=test_user_email, app_key='app_key', permission='w'):
         params = {'email': email,
                   'app_key': app_key,

@@ -73,3 +73,11 @@ class AuthTest(AnarchoTestCase):
         r = self.register(test_user_email, test_user_name, '123')
         self.assert_status_code(r, 403)
         self.assert_error_message(r, 'invalid_password_length')
+
+    def test_registration_with_insensitive_email(self):
+        email = 'TeStEr@MaIl.cOm'
+        self.register(email=email, name='tester', password=test_user_password)
+        r = self.login(email=email.lower(), password=test_user_password)
+        self.assert_status_code(r)
+        response_data = json.loads(r.data)
+        self.assertTrue('authToken' in response_data, msg='User can not login with insensitive email!')
