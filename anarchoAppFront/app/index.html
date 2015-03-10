@@ -24,23 +24,7 @@
 <toast></toast>
 <!-- Add your site or application content here -->
 <div class="container">
-
-    <div class="navbar navbar-default row" role="navigation">
-        <div class="container-fluid span12">
-            <a class="navbar-brand" href="#">anarcho</a>
-
-            <ul class="nav navbar-nav" ng-if="currentUser">
-                <li><a href="#apps">Apps</a></li>
-                <!--<li><a href="#tracks">Tracks</a></li>-->
-            </ul>
-            <ul class="nav navbar-nav navbar-right">
-                <li>
-                    <a href="#" ng-controller="AuthCtrl" ng-click='logout()' ng-if="currentUser">Logout <b>{{currentUser.name}}</b></a>
-                </li>
-            </ul>
-        </div>
-
-    </div>
+    <div ng-include="'views/nav_bar.html'"></div>
     <div class="text-center" ng-show="$rootScope.isLoading()">
         <img src="images/loader.gif">
     </div>
