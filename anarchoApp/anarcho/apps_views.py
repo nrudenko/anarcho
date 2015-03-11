@@ -1,6 +1,3 @@
-import datetime
-from sqlalchemy import desc
-
 from anarcho.models.token import Token
 from anarcho.models.user import User
 from flask.json import jsonify
@@ -10,7 +7,6 @@ from anarcho.serializer import serialize
 from anarcho.access_manager import app_permissions, login_required
 from flask.helpers import send_file
 from anarcho.models.application import Application
-from anarcho.models.build import Build
 from anarcho.models.user_app import UserApp
 from flask import request, Response, make_response, g
 from flask.ext.cors import cross_origin
@@ -71,6 +67,7 @@ def app_info(app_key):
         return serialize(application)
     return make_response('{"error":"app_not_found"}', 404)
 
+
 @app.route('/api/icon/<app_key>', methods=['GET'])
 def get_icon(app_key=None):
     if isinstance(storage_worker, LocalStorageWorker):
@@ -90,7 +87,8 @@ def get_plugin_config(app_key):
         return make_response('{"error":"app_not_found"}', 404)
     user = user_app.user
     response = {
-        'uploadUrl': app.config['PUBLIC_HOST'] + '/api/apps/' + app_key,
-        'apiToken': user.token.auth_token
+        'host': app.config['PUBLIC_HOST'],
+        'app_key': app_key,
+        'api_token': user.token.auth_token
     }
     return jsonify(response)

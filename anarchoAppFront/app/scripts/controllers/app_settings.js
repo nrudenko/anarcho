@@ -1,4 +1,4 @@
-var AppSettingsCtrl = function ($scope, $routeParams, AppsService) {
+var AppSettingsCtrl = function ($rootScope, $scope, $routeParams, AppsService) {
     $scope.app = {};
     $scope.appKey = $routeParams.app_key;
 
@@ -24,7 +24,12 @@ var AppSettingsCtrl = function ($scope, $routeParams, AppsService) {
                 includePage = "views/settings_remove_app.html";
                 break;
             case "plugin":
-                includePage = "views/settings_plugin_config.html";
+                if ($scope.app.app_type==='andr') {
+                    includePage = "views/settings_plugin_config_android.html";
+                } else {
+                    includePage = "views/settings_plugin_config_bash.html";
+                }
+
                 break;
         }
 
@@ -44,4 +49,4 @@ var AppSettingsCtrl = function ($scope, $routeParams, AppsService) {
 
     $scope.init();
 };
-app.controller("AppSettingsCtrl", ['$scope', '$routeParams', 'AppsService', AppSettingsCtrl]);
+app.controller("AppSettingsCtrl", ['$rootScope', '$scope', '$routeParams', 'AppsService', AppSettingsCtrl]);
