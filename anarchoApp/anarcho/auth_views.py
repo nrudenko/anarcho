@@ -55,7 +55,7 @@ def register():
         else:
             user = u
             user.name = name
-            user.password = password
+            user.hash_password(password)
             db.session.commit()
 
         token = Token(user)
