@@ -28,14 +28,14 @@
     <table class="table table-striped table-hover">
         <tr>
             <th ng-if="canWrite()"></th>
-            <th>
+            <th class="text-center">
                 <order-btn field='version_name' text="Version Name"/>
             </th>
-            <th>
+            <th class="text-center">
                 <order-btn field='version_code' text="Version Code"/>
             </th>
-            <th>Release notes</th>
-            <th>
+            <th class="text-center">Release notes</th>
+            <th class="text-center">
                 <order-btn field='created_on' reverse="true" text="Upload date"/>
             </th>
         </tr>
@@ -47,10 +47,10 @@
                         ng-click="toggleBuild(b.id)"
                         >
             </td>
-            <td ng-click="showBuildInfo(b)">{{ b.version_name }}</td>
-            <td ng-click="showBuildInfo(b)">{{ b.version_code }}</td>
-            <td ng-click="showBuildInfo(b)" style="text-align: left;">{{ b.release_notes | addEllipsis : 30 }}</td>
-            <td ng-click="showBuildInfo(b)" style="white-space: nowrap;">
+            <td ng-click="showBuildInfo(b)" class="text-center">{{ b.version_name }}</td>
+            <td ng-click="showBuildInfo(b)" class="text-center">{{ b.version_code }}</td>
+            <td ng-click="showBuildInfo(b)" class="text-center">{{ b.release_notes | addEllipsis : 30 }}</td>
+            <td ng-click="showBuildInfo(b)" class="text-nowrap text-center">
                 {{ b.created_on * 1000 | date : 'yyyy-MM-dd HH:mm:ss' }}</td>
         </tr>
     </table>
