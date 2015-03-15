@@ -1,43 +1,20 @@
 'use strict';
-var MainCtrl = function ($rootScope, $scope, $cookieStore, $timeout, AUTH_EVENTS, Session, AuthService) {
+var MainCtrl = function ($scope, $cookieStore, $timeout, AUTH_EVENTS, Session, AuthService) {
 
-    $rootScope.showLoader = function () {
+    $scope.isLoading = false;
+
+    $scope.showLoader = function () {
         $scope.progressTimeout = $timeout(function () {
             $scope.showProgress = true;
-        }, 1000);
+        }, 2000);
     };
 
-    $rootScope.hideLoader = function () {
+    $scope.hideLoader = function () {
         $scope.showProgress = false;
         $timeout.cancel($scope.progressTimeout);
     };
 
-    $rootScope.isLoading = function () {
-        return $scope.showProgress;
-    };
-
-    $scope.loadUser = function () {
-        if (Session.isAuthorized()) {
-            AuthService.getUser().then(function (user) {
-                $scope.currentUser = user;
-                $rootScope.hideLoader();
-            }).catch(function () {
-                $rootScope.hideLoader();
-            });
-        }
-    };
-
-    $scope.$on(AUTH_EVENTS.loginSuccess, function () {
-        $scope.loadUser();
-    });
-
-    $scope.$on(AUTH_EVENTS.logoutSuccess, function () {
-        $scope.currentUser = null;
-    });
-
-    $scope.loadUser();
-
-    $rootScope.isMobile = {
+    $scope.isMobile = {
         Android: function () {
             return /Android/i.test(navigator.userAgent);
         },
@@ -54,10 +31,29 @@ var MainCtrl = function ($rootScope, $scope, $cookieStore, $timeout, AUTH_EVENTS
             return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Windows());
         }
     };
+
+    $scope.loadUser = function () {
+        if (Session.isAuthorized()) {
+            AuthService.getUser().then(function (user) {
+                $scope.currentUser = user;
+            }).finally(function () {
+                $scope.hideLoader();
+            });
+        }
+    };
+
+    $scope.$on(AUTH_EVENTS.loginSuccess, function () {
+        $scope.loadUser();
+    });
+
+    $scope.$on(AUTH_EVENTS.logoutSuccess, function () {
+        $scope.currentUser = null;
+    });
+
+    $scope.loadUser();
 };
 
 app.controller('MainCtrl', [
-    '$rootScope',
     '$scope',
     '$cookieStore',
     '$timeout',

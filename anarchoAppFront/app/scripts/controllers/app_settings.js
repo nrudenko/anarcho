@@ -1,4 +1,4 @@
-var AppSettingsCtrl = function ($rootScope, $scope, $routeParams, AppsService) {
+var AppSettingsCtrl = function ($scope, $routeParams, AppsService) {
     $scope.app = {};
     $scope.appKey = $routeParams.app_key;
 
@@ -43,10 +43,6 @@ var AppSettingsCtrl = function ($rootScope, $scope, $routeParams, AppsService) {
         });
     };
 
-    $scope.init = function () {
-        $scope.getApp($scope.appKey);
-    };
-
-    $scope.init();
+    $scope.getApp($scope.appKey);
 };
-app.controller("AppSettingsCtrl", ['$rootScope', '$scope', '$routeParams', 'AppsService', AppSettingsCtrl]);
+app.controller("AppSettingsCtrl", ['$scope', '$routeParams', 'AppsService', AppSettingsCtrl]);

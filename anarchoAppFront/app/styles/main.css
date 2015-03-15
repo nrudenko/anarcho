@@ -69,3 +69,12 @@
     border: 0;
     border-right: 1px solid #cccccc;
 }
+
+.progress-indicator{
+    position:absolute;
+    top:5%;
+    left:50%;
+    width:100%;
+    height:100%;
+    z-index:1000;
+  }

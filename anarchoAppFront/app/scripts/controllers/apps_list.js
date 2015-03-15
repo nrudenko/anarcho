@@ -1,5 +1,5 @@
 'use strict';
-var appCtrl = function ($rootScope, $scope, $modal, AppsService) {
+var AppsListCtrl = function ($scope, $modal, AppsService) {
     $scope.apps = [];
 
     var showNewAppCtrl = function ($scope, $modalInstance) {
@@ -23,10 +23,10 @@ var appCtrl = function ($rootScope, $scope, $modal, AppsService) {
                 $scope.addApp(app);
             });
     };
-    $rootScope.showLoader();
+    $scope.showLoader();
     AppsService.list().success(function (data) {
         $scope.apps = data.list;
-        $rootScope.hideLoader();
+        $scope.hideLoader();
     });
 
     $scope.addApp = function (app) {
@@ -37,4 +37,4 @@ var appCtrl = function ($rootScope, $scope, $modal, AppsService) {
 
 };
 
-app.controller("AppsCtrl", ['$rootScope', '$scope', '$modal', 'AppsService', appCtrl]);
+app.controller("AppsCtrl", ['$scope', '$modal', 'AppsService', AppsListCtrl]);

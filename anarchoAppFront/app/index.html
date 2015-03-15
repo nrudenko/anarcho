@@ -25,13 +25,14 @@
 <!-- Add your site or application content here -->
 <div class="container">
     <div ng-include="'views/nav_bar.html'"></div>
-    <div class="text-center" ng-show="$rootScope.isLoading()">
+    <div ng-show="!isLoading">
+        <div ng-show="!currentUser" ng-include="'views/auth.html'"></div>
+        <div ng-show="currentUser" ng-view></div>
+    </div>
+    <div class="progress-indicator" ng-show="isLoading">
         <img src="images/loader.gif">
     </div>
-    <div ng-include="'views/auth.html'" ng-if="!currentUser"></div>
-    <div ng-view ng-if="currentUser"></div>
-    <div class="footer">
-    </div>
+    <div class="footer"></div>
 </div>
 <!-- build:js(.) scripts/oldieshim.js -->
 <!--[if lt IE 9]>
@@ -69,7 +70,7 @@
 
 <script src="scripts/controllers/auth.js"></script>
 <script src="scripts/controllers/tracks.js"></script>
-<script src="scripts/controllers/apps.js"></script>
+<script src="scripts/controllers/apps_list.js"></script>
 <script src="scripts/controllers/app_details.js"></script>
 <script src="scripts/controllers/build_details.js"></script>
 <script src="scripts/controllers/app_settings.js"></script>
@@ -78,15 +79,14 @@
 <script src="scripts/controllers/app_plugin.js"></script>
 <script src="scripts/controllers/main.js"></script>
 
-
 <script src="scripts/services/api_service.js"></script>
 <script src="scripts/services/auth_service.js"></script>
 <script src="scripts/services/session_service.js"></script>
 <script src="scripts/services/apps_service.js"></script>
 <script src="scripts/services/tracks_service.js"></script>
 <script src="scripts/services/settings_service.js"></script>
-<script src="scripts/services/url_service.js"></script>
 <script src="scripts/services/permission_service.js"></script>
+
 <script src="scripts/directive/directives.js"></script>
 <!-- endbuild -->
 </body>

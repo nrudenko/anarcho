@@ -1,5 +1,5 @@
 'use strict';
-var appDetailsCtrl = function ($rootScope, $scope, $modal, $timeout, $routeParams, AppsService, $location, PermissionService, ngToast) {
+var appDetailsCtrl = function ($scope, $modal, $timeout, $routeParams, AppsService, $location, PermissionService, ngToast) {
 
     PermissionService.extend($scope);
 
@@ -13,17 +13,16 @@ var appDetailsCtrl = function ($rootScope, $scope, $modal, $timeout, $routeParam
     $scope.buildsList = function (appKey) {
         AppsService.getBuilds(appKey).then(function (res) {
             $scope.builds = res.data.list;
-        })
+        }).finally(function () {
+            $rootScope.showLoader();
+        });
     };
 
     $scope.getApp = function (appKey) {
         AppsService.get(appKey).then(function (res) {
             $scope.app = res.data;
-            $scope.buildsList($scope.appKey);
-            $rootScope.hideLoader();
         });
     };
-
 
     $scope.onFileSelect = function (files) {
         var file = files[0];
@@ -31,22 +30,22 @@ var appDetailsCtrl = function ($rootScope, $scope, $modal, $timeout, $routeParam
         AppsService.uploadBuild(
             $scope.appKey,
             file,
-            function(progress) {
+            function (progress) {
                 $scope.progress = progress;
             }
-        ).then(function(data) {
-            $scope.builds.push(data);
-            $scope.getApp($scope.appKey);
-        }).catch(function(xhr) {
-            ngToast.create({
-                content: xhr.data.error,
-                className: 'danger'
+        ).then(function (data) {
+                $scope.builds.push(data);
+                $scope.getApp($scope.appKey);
+            }).catch(function (xhr) {
+                ngToast.create({
+                    content: xhr.data.error,
+                    className: 'danger'
+                });
+            }).finally(function () {
+                $timeout(function () {
+                    $scope.progress = -1;
+                }, 1000);
             });
-        }).finally(function() {
-            $timeout(function() {
-                $scope.progress = -1;
-            }, 1000);
-        });
     };
 
     $scope.showBuildInfo = function (build) {
@@ -73,12 +72,12 @@ var appDetailsCtrl = function ($rootScope, $scope, $modal, $timeout, $routeParam
         }
     };
 
-
-    $rootScope.showLoader();
+    $scope.showLoader();
     $scope.getApp($scope.appKey);
+    $scope.buildsList($scope.appKey);
 };
 
-app.controller("AppDetailsCtrl", ['$rootScope', '$scope', '$modal', '$timeout', '$routeParams', 'AppsService',
+app.controller("AppDetailsCtrl", ['$scope', '$modal', '$timeout', '$routeParams', 'AppsService',
     '$location', 'PermissionService', 'ngToast', appDetailsCtrl]);
 
 
