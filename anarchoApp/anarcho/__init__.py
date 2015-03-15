@@ -9,6 +9,12 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from flask import Flask, redirect, request, Response, send_file
 
 
+def __version__():
+    from pkg_resources import get_distribution
+
+    return get_distribution('anarcho').version
+
+
 app = Flask(__name__, static_url_path="")
 
 from anarcho.storage_workers import storage_types
@@ -79,7 +85,7 @@ def cert():
 @app.route('/api/ping', methods=['GET'])
 @cross_origin(headers=['x-auth-token'])
 def ping():
-    return Response(status=200)
+    return Response(__version__(), status=200)
 
 
 @app.errorhandler(404)
