@@ -25,6 +25,28 @@ var IconSrc = function () {
     return errSrc;
 };
 
+var AppTypeIcon = function () {
+
+    var appLogoSrc = {};
+
+    appLogoSrc.link =
+        function (scope, element, attrs) {
+            scope.$watch(function () {
+                var type = attrs['appTypeIcon'];
+                element.css('display', 'initial');
+                if (type === 'andr') {
+                    element.attr('src', 'images/droid_logo.png');
+                } else if (type === 'ios') {
+                    element.attr('src', 'images/ios_logo.png');
+                } else {
+                    element.css('display', 'none');
+                }
+            });
+        };
+
+    return appLogoSrc;
+};
+
 
 var OrderBtn = function () {
     var orderBtn = {};
@@ -96,5 +118,6 @@ function FocusOn($timeout) {
 }
 
 app.directive('iconSrc', IconSrc);
+app.directive('appTypeIcon', AppTypeIcon);
 app.directive('orderBtn', OrderBtn);
 app.directive('focusOn', ['$timeout', FocusOn]);

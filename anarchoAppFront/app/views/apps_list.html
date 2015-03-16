@@ -5,8 +5,9 @@
         <a href="#/apps/{{ a.app_key }}">
             <div class="list-group-item app-item-container">
                 <img icon-src="{{ a.icon_url }}" class="app-icon">
+                <img app-type-icon="{{a.app_type}}" class="app-label-icon">
 
-                <p>{{ a.name }}</p>
+                <p class="text-center">{{ a.name }} </p>
             </div>
         </a>
     </div>
