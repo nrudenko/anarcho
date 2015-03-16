@@ -1,4 +1,4 @@
-var SettingsService = function (Api) {
+var TeamService = function (Api) {
     var settingsService = {};
 
     settingsService.add = function (user_app) {
@@ -19,4 +19,4 @@ var SettingsService = function (Api) {
     return settingsService;
 };
 
-app.factory('SettingsService', ['Api', SettingsService]);
+app.factory('TeamService', ['Api', TeamService]);

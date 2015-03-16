@@ -1,18 +1,6 @@
-var AppSettingsCtrl = function ($scope, $routeParams, AppsService) {
-    $scope.app = {};
-    $scope.appKey = $routeParams.app_key;
-
-    $scope.canWrite = function () {
-        return $scope.hasPermission("w");
-    };
-
-    $scope.hasPermission = function (key) {
-        if ($scope.app.permission) {
-            return $scope.app.permission.indexOf(key) != -1;
-        } else {
-            return false;
-        }
-    };
+'use strict';
+var AppSettingsCtrl = function ($scope, $routeParams, AppsService, $controller) {
+    $controller('AppBaseCtrl', {$scope: $scope});
 
     $scope.getInclude = function () {
         var includePage = "";
@@ -24,7 +12,7 @@ var AppSettingsCtrl = function ($scope, $routeParams, AppsService) {
                 includePage = "views/settings_remove_app.html";
                 break;
             case "plugin":
-                if ($scope.app.app_type==='andr') {
+                if ($scope.app.app_type === 'andr') {
                     includePage = "views/settings_plugin_config_android.html";
                 } else {
                     includePage = "views/settings_plugin_config_bash.html";
@@ -36,13 +24,7 @@ var AppSettingsCtrl = function ($scope, $routeParams, AppsService) {
         return includePage;
     };
 
-    $scope.getApp = function (appKey) {
-        AppsService.get(appKey).then(function (res) {
-            $scope.app = res.data;
-            $scope.action = "team";
-        });
-    };
-
-    $scope.getApp($scope.appKey);
+    $scope.loadApp();
+    $scope.action = "team";
 };
-app.controller("AppSettingsCtrl", ['$scope', '$routeParams', 'AppsService', AppSettingsCtrl]);
+app.controller("AppSettingsCtrl", ['$scope', '$routeParams', 'AppsService', '$controller', AppSettingsCtrl]);

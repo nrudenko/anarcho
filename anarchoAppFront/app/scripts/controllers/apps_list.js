@@ -11,6 +11,7 @@ var AppsListCtrl = function ($scope, $modal, AppsService) {
             $modalInstance.dismiss();
         };
     };
+
     showNewAppCtrl.$inject = ['$scope', '$modalInstance'];
     $scope.showNewApp = function () {
         $modal.open({
@@ -23,11 +24,14 @@ var AppsListCtrl = function ($scope, $modal, AppsService) {
                 $scope.addApp(app);
             });
     };
-    $scope.showLoader();
-    AppsService.list().success(function (data) {
-        $scope.apps = data.list;
-        $scope.hideLoader();
-    });
+
+    $scope.getList = function () {
+        AppsService.list().then(function (data) {
+            $scope.apps = data.list;
+        }).finally(function () {
+            $scope.hideLoader();
+        });
+    };
 
     $scope.addApp = function (app) {
         AppsService.add(app).then(function (response) {
@@ -35,6 +39,8 @@ var AppsListCtrl = function ($scope, $modal, AppsService) {
         });
     };
 
+    $scope.showLoader();
+    $scope.getList();
 };
 
 app.controller("AppsCtrl", ['$scope', '$modal', 'AppsService', AppsListCtrl]);

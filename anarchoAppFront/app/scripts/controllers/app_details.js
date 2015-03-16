@@ -1,12 +1,8 @@
 'use strict';
-var appDetailsCtrl = function ($scope, $modal, $timeout, $routeParams, AppsService, $location, PermissionService, ngToast) {
+var AppDetailsCtrl = function ($scope, $modal, $timeout, AppsService, $location, $controller, ngToast) {
+    $controller('AppBaseCtrl', {$scope: $scope});
 
-    PermissionService.extend($scope);
-
-    $scope.app = {};
     $scope.builds = [];
-
-    $scope.appKey = $routeParams.app_key;
 
     $scope.progress = -1;
 
@@ -14,13 +10,7 @@ var appDetailsCtrl = function ($scope, $modal, $timeout, $routeParams, AppsServi
         AppsService.getBuilds(appKey).then(function (res) {
             $scope.builds = res.data.list;
         }).finally(function () {
-            $rootScope.showLoader();
-        });
-    };
-
-    $scope.getApp = function (appKey) {
-        AppsService.get(appKey).then(function (res) {
-            $scope.app = res.data;
+            $rootScope.hideLoader();
         });
     };
 
@@ -73,11 +63,11 @@ var appDetailsCtrl = function ($scope, $modal, $timeout, $routeParams, AppsServi
     };
 
     $scope.showLoader();
-    $scope.getApp($scope.appKey);
+    $scope.loadApp();
     $scope.buildsList($scope.appKey);
 };
 
-app.controller("AppDetailsCtrl", ['$scope', '$modal', '$timeout', '$routeParams', 'AppsService',
-    '$location', 'PermissionService', 'ngToast', appDetailsCtrl]);
+app.controller("AppDetailsCtrl", ['$scope', '$modal', '$timeout', 'AppsService',
+    '$location', '$controller', 'ngToast', AppDetailsCtrl]);
 
 

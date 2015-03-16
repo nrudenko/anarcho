@@ -1,14 +1,20 @@
-var AppTeamCtrl = function ($scope, SettingsService) {
+'use strict';
+var AppTeamCtrl = function ($scope, TeamService) {
+    $scope.all_permissions = [
+        {id: "w", name: "Write"},
+        {id: "r", name: "Read"}
+    ];
+
     $scope.permissions = [];
     $scope.usersList = function (app_key) {
-        SettingsService.list(app_key).success(function (data) {
+        TeamService.list(app_key).success(function (data) {
             $scope.permissions = data.list;
         });
     };
 
     $scope.addUser = function (permission) {
-        permission.app_key = $scope.app.app_key;
-        SettingsService.add(permission).then(function (data) {
+        permission.app_key = $scope.appKey;
+        TeamService.add(permission).then(function (data) {
             $scope.permissions.push(data.data);
             $scope.error = null;
         }, function (error) {
@@ -17,14 +23,15 @@ var AppTeamCtrl = function ($scope, SettingsService) {
     };
 
     $scope.updateUser = function (user_app) {
-        user_app.app_key = $scope.app.app_key;
-        SettingsService.update(user_app).success(function (data) {
+        user_app.app_key = $scope.appKey;
+        TeamService.update(user_app).success(function (data) {
+            //TODO implement
         });
     };
 
     $scope.revokeUser = function (user_app) {
-        user_app.app_key = $scope.app.app_key;
-        SettingsService.revoke(user_app).success(function (data) {
+        user_app.app_key = $scope.appKey;
+        TeamService.revoke(user_app).success(function (data) {
             for (var i = 0; i < $scope.permissions.length; i++) {
                 if ($scope.permissions[i].email === data.email) {
                     $scope.permissions.splice(i, 1);
@@ -34,12 +41,7 @@ var AppTeamCtrl = function ($scope, SettingsService) {
         });
     };
 
-    $scope.usersList($scope.app.app_key);
-
-    $scope.all_permissions = [
-        {id: "w", name: "Write"},
-        {id: "r", name: "Read"}
-    ];
+    $scope.usersList($scope.appKey);
 };
 
-app.controller("AppTeamCtrl", ['$scope', 'SettingsService', AppTeamCtrl]);
+app.controller("AppTeamCtrl", ['$scope', 'TeamService', AppTeamCtrl]);

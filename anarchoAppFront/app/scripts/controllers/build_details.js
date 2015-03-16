@@ -1,22 +1,17 @@
-var buildDetailsCtrl = function ($scope, $routeParams, AppsService, ngToast, PermissionService, app_config) {
-    PermissionService.extend($scope);
+var BuildDetailsCtrl = function ($scope, AppsService, $routeParams, ngToast, $controller, app_config) {
+    $controller('AppBaseCtrl', {$scope: $scope});
+
     $scope.certLink = app_config.API_URL + 'cert';
-    $scope.app = {};
     $scope.buildId = $routeParams.build_id;
-    $scope.appKey = $routeParams.app_key;
     $scope.editNotesDisabled = true;
 
-    $scope.getApp = function () {
-        AppsService.get($scope.appKey).then(function (res) {
-                $scope.app = res.data;
-                if ($scope.app.app_type === 'ios') {
-                    $scope.iosApp = true;
-                } else {
-                    $scope.iosApp = false;
-                }
-            }
-        );
-    };
+    $scope.$watch('app', function () {
+        if ($scope.app.app_type === 'ios') {
+            $scope.iosApp = true;
+        } else {
+            $scope.iosApp = false;
+        }
+    });
 
     $scope.getBuild = function () {
         AppsService.getBuild($scope.appKey, $scope.buildId).then(function (res) {
@@ -38,7 +33,6 @@ var buildDetailsCtrl = function ($scope, $routeParams, AppsService, ngToast, Per
                 content: 'Can\'t update release notes',
                 className: 'danger'
             });
-            console.log();
         });
     };
 
@@ -47,9 +41,9 @@ var buildDetailsCtrl = function ($scope, $routeParams, AppsService, ngToast, Per
     };
 
     $scope.showLoader();
-    $scope.getApp();
+    $scope.loadApp();
     $scope.getBuild();
 };
 
-app.controller("BuildDetailsCtrl", ['$scope', '$routeParams', 'AppsService', 'ngToast',
-    'PermissionService', 'app_config', buildDetailsCtrl]);
+app.controller("BuildDetailsCtrl", ['$scope', 'AppsService', '$routeParams',
+    'ngToast', '$controller', 'app_config', BuildDetailsCtrl]);
