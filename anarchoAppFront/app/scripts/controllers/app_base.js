@@ -17,9 +17,10 @@ var AppBaseCtrl = function ($scope, $routeParams, AppsService) {
     };
 
     $scope.loadApp = function () {
-        AppsService.get($scope.appKey).then(function (res) {
-            $scope.app = res.data;
-        });
+        AppsService.get($scope.appKey)
+            .success(function (data) {
+                $scope.app = data;
+            });
     };
 };
 

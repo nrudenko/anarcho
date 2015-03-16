@@ -7,11 +7,12 @@ var AppDetailsCtrl = function ($scope, $modal, $timeout, AppsService, $location,
     $scope.progress = -1;
 
     $scope.buildsList = function (appKey) {
-        AppsService.getBuilds(appKey).then(function (res) {
-            $scope.builds = res.data.list;
-        }).finally(function () {
-            $rootScope.hideLoader();
-        });
+        AppsService.getBuilds(appKey)
+            .success(function (data) {
+                $scope.builds = data.list;
+            }).finally(function () {
+                $rootScope.hideLoader();
+            });
     };
 
     $scope.onFileSelect = function (files) {
@@ -23,12 +24,12 @@ var AppDetailsCtrl = function ($scope, $modal, $timeout, AppsService, $location,
             function (progress) {
                 $scope.progress = progress;
             }
-        ).then(function (data) {
+        ).success(function (data) {
                 $scope.builds.push(data);
                 $scope.getApp($scope.appKey);
-            }).catch(function (xhr) {
+            }).error(function (data) {
                 ngToast.create({
-                    content: xhr.data.error,
+                    content: data.error,
                     className: 'danger'
                 });
             }).finally(function () {
@@ -44,10 +45,11 @@ var AppDetailsCtrl = function ($scope, $modal, $timeout, AppsService, $location,
 
     $scope.ids = [];
     $scope.remove = function () {
-        AppsService.removeBuilds($scope.appKey, $scope.ids).then(function (res) {
-            $scope.ids = [];
-            $scope.buildsList($scope.appKey);
-        })
+        AppsService.removeBuilds($scope.appKey, $scope.ids)
+            .success(function (data) {
+                $scope.ids = [];
+                $scope.buildsList($scope.appKey);
+            })
     };
 
     $scope.toggleBuild = function (id) {

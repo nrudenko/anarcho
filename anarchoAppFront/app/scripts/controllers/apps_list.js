@@ -19,24 +19,26 @@ var AppsListCtrl = function ($scope, $modal, AppsService) {
                 size: "sm",
                 controller: showNewAppCtrl
             }
-        ).
-            result.then(function (app) {
+        ).result
+            .then(function (app) {
                 $scope.addApp(app);
             });
     };
 
     $scope.getList = function () {
-        AppsService.list().then(function (data) {
-            $scope.apps = data.list;
-        }).finally(function () {
-            $scope.hideLoader();
-        });
+        AppsService.list()
+            .success(function (data) {
+                $scope.apps = data.list;
+            }).finally(function () {
+                $scope.hideLoader();
+            });
     };
 
     $scope.addApp = function (app) {
-        AppsService.add(app).then(function (response) {
-            $scope.apps.push(response.data);
-        });
+        AppsService.add(app)
+            .success(function (data) {
+                $scope.apps.push(data);
+            });
     };
 
     $scope.showLoader();

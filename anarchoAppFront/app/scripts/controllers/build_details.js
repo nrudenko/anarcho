@@ -14,11 +14,12 @@ var BuildDetailsCtrl = function ($scope, AppsService, $routeParams, ngToast, $co
     });
 
     $scope.getBuild = function () {
-        AppsService.getBuild($scope.appKey, $scope.buildId).then(function (res) {
-            $scope.build = res.data;
-        }).finally(function () {
-            $rootScope.hideLoader();
-        });
+        AppsService.getBuild($scope.appKey, $scope.buildId)
+            .success(function (data) {
+                $scope.build = data;
+            }).finally(function () {
+                $rootScope.hideLoader();
+            });
     };
 
     $scope.editNotes = function () {
@@ -26,14 +27,15 @@ var BuildDetailsCtrl = function ($scope, AppsService, $routeParams, ngToast, $co
     };
 
     $scope.saveNotes = function () {
-        AppsService.postNotes($scope.appKey, $scope.buildId, $scope.build.release_notes).then(function () {
-            $scope.editNotesDisabled = true;
-        }, function () {
-            ngToast.create({
-                content: 'Can\'t update release notes',
-                className: 'danger'
+        AppsService.postNotes($scope.appKey, $scope.buildId, $scope.build.release_notes)
+            .success(function () {
+                $scope.editNotesDisabled = true;
+            }).error(function () {
+                ngToast.create({
+                    content: 'Can\'t update release notes',
+                    className: 'danger'
+                });
             });
-        });
     };
 
     $scope.linkCopied = function () {

@@ -7,7 +7,8 @@ app.controller("TracksCtrl", ['$scope', 'TracksService', function ($scope, Track
 //            $scope.tracks = resp.data;
 //        });
 //    };
-    TracksService.fetch().success(function (data) {
-        $scope.tracks = data.data;
-    });
+    TracksService.fetch()
+        .success(function (data) {
+            $scope.tracks = data.data;
+        });
 }]);

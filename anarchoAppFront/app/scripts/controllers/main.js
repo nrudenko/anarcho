@@ -1,5 +1,5 @@
 'use strict';
-var MainCtrl = function ($scope, $cookieStore, $timeout, AUTH_EVENTS, Session, AuthService) {
+var MainCtrl = function ($scope, $cookieStore, $timeout, AUTH_EVENTS, Session, AuthService, $route) {
 
     $scope.isLoading = false;
 
@@ -34,11 +34,13 @@ var MainCtrl = function ($scope, $cookieStore, $timeout, AUTH_EVENTS, Session, A
 
     $scope.loadUser = function () {
         if (Session.isAuthorized()) {
-            AuthService.getUser().then(function (user) {
-                $scope.currentUser = user;
-            }).finally(function () {
-                $scope.hideLoader();
-            });
+            AuthService.getUser()
+                .success(function (user) {
+                    $scope.currentUser = user;
+                    $route.reload();
+                }).finally(function () {
+                    $scope.hideLoader();
+                });
         }
     };
 
@@ -60,6 +62,7 @@ app.controller('MainCtrl', [
     'AUTH_EVENTS',
     'Session',
     'AuthService',
+    '$route',
     MainCtrl]);
 
 
