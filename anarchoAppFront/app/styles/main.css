@@ -47,14 +47,8 @@
 }
 
 .add-app-icon {
-    height: 48px;
-    width: 48px;
-    position: absolute;
-    margin: auto;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    height: 36px;
+    width: 36px;
 }
 
 .upload-dragover {
