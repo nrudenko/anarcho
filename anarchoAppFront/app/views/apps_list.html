@@ -1,20 +1,22 @@
 <div ng-controller="AppsCtrl">
+
+    <div class="text-right">
+        <span class="btn btn-default" ng-click="showNewApp()">
+            <img src="../images/button-add.png" class=add-app-icon> Add new app...
+        </span>
+    </div>
+
     <p class="text-muted">Your apps:</p>
 
     <div ng-repeat="a in apps">
         <a href="#/apps/{{ a.app_key }}">
             <div class="list-group-item app-item-container">
                 <img icon-src="{{ a.icon_url }}" class="app-icon">
+                <img app-type-icon="{{a.app_type}}" class="app-label-icon">
 
-                <p>{{ a.name }}</p>
+                <p class="text-center">{{ a.name }} </p>
             </div>
         </a>
-    </div>
-
-    <div class="list-group-item app-item-container" ng-click="showNewApp()">
-        <img src="../images/button-add.png" class="app-icon">
-
-        <p>New</p>
     </div>
 
 </div>

@@ -34,15 +34,21 @@
     margin: 10px;
 }
 
-.add-app-icon {
-    height: 48px;
-    width: 48px;
+.app-label-icon {
     position: absolute;
-    margin: auto;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    height: 20px;
+    width: 20px;
+    margin-top: -5px;
+}
+
+.details-app-label-icon {
+    height: 16px;
+    width: 16px;
+}
+
+.add-app-icon {
+    height: 36px;
+    width: 36px;
 }
 
 .upload-dragover {
