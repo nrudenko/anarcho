@@ -7,12 +7,10 @@ from anarcho.models.application import Application, ANDR, IOS
 from anarcho.models.build import Build
 from anarcho.serializer import serialize, BuildSerializer
 from flask import request, Response, make_response, send_file, jsonify
-from flask.ext.cors import cross_origin
 from flask.templating import render_template
 
 
 @app.route('/api/apps/<app_key>/builds', methods=['DELETE'])
-@cross_origin(headers=['x-auth-token', 'Content-Type'], methods=['DELETE'])
 @login_required
 @app_permissions(permissions=["w"])
 def delete_builds_list(app_key):
@@ -26,7 +24,6 @@ def delete_builds_list(app_key):
 
 
 @app.route('/api/apps/<app_key>/builds', methods=['GET'])
-@cross_origin(headers=['x-auth-token'])
 @login_required
 def builds_list(app_key):
     builds = Build.query.filter_by(app_key=app_key).order_by(desc(Build.created_on)).all()
@@ -34,7 +31,6 @@ def builds_list(app_key):
 
 
 @app.route('/api/apps/<app_key>/<int:build_id>', methods=['GET'])
-@cross_origin(headers=['x-auth-token'])
 @login_required
 def get_build(app_key, build_id):
     build = Build.query.filter_by(app_key=app_key, id=build_id).first()
@@ -53,7 +49,6 @@ def get_build(app_key, build_id):
 
 
 @app.route('/api/apps/<app_key>/<int:build_id>/notes', methods=['POST'])
-@cross_origin(headers=['x-auth-token', 'Content-Type'])
 @login_required
 @app_permissions(permissions=["w"])
 def update_build_notes(app_key, build_id):

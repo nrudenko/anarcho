@@ -5,11 +5,9 @@ from anarcho.models.user import User
 from anarcho.models.user_app import UserApp
 from anarcho.access_manager import app_permissions, login_required, is_permission_allowed
 from flask import request, make_response, g
-from flask.ext.cors import cross_origin
 
 
 @app.route('/api/permission/<app_key>', methods=['GET'])
-@cross_origin(headers=['x-auth-token'])
 @login_required
 @app_permissions(permissions=["r", "w"])
 def users_list(app_key=None):
@@ -18,7 +16,6 @@ def users_list(app_key=None):
 
 
 @app.route('/api/permission', methods=['POST', 'PATCH', 'DELETE'])
-@cross_origin(headers=['x-auth-token', 'Content-Type'], methods=['POST', 'PATCH', 'DELETE'])
 @login_required
 @app_permissions(permissions=["w"])
 def revoke_team_membership():

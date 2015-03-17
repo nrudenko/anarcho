@@ -5,7 +5,6 @@ from anarcho.ipa_helper import parse_ipa
 from anarcho.models.application import Application, IOS, ANDR
 from anarcho.serializer import serialize
 from flask import request, make_response
-from flask.ext.cors import cross_origin
 import os
 from werkzeug.utils import secure_filename
 
@@ -21,7 +20,6 @@ def get_app_type(filename):
 
 
 @app.route('/api/apps/<app_key>', methods=['POST'])
-@cross_origin(headers=['x-auth-token'])
 @login_required
 @app_permissions(permissions=['w', 'u'])
 def upload(app_key):

@@ -5,11 +5,9 @@ from anarcho.models.token import Token
 from anarcho.serializer import serialize
 from anarcho.models.user import User
 from flask import request, g, Response, make_response
-from flask.ext.cors import cross_origin
 
 
 @app.route('/api/register', methods=['POST'])
-@cross_origin(headers=['Content-Type', 'x-auth-token'])
 def register():
     if 'name' in request.json:
         name = request.json['name']
@@ -67,7 +65,6 @@ def register():
 
 
 @app.route('/api/login', methods=['POST'])
-@cross_origin(headers=['Content-Type', 'x-auth-token'])
 def login():
     email = request.json['email'].lower()
     password = request.json['password']
@@ -80,7 +77,6 @@ def login():
 
 
 @app.route('/api/user', methods=['GET'])
-@cross_origin(headers=['x-auth-token'])
 @login_required
 def user():
     return serialize(g.user)

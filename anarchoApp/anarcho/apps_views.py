@@ -9,12 +9,10 @@ from flask.helpers import send_file
 from anarcho.models.application import Application
 from anarcho.models.user_app import UserApp
 from flask import request, Response, make_response, g
-from flask.ext.cors import cross_origin
 from storage_workers import LocalStorageWorker
 
 
 @app.route('/api/apps', methods=['GET'])
-@cross_origin(headers=['x-auth-token', 'Content-Type'])
 @login_required
 def apps_list():
     user_apps = UserApp.query.filter_by(user_id=g.user.id).all()
@@ -22,7 +20,6 @@ def apps_list():
 
 
 @app.route('/api/apps', methods=['POST'])
-@cross_origin(headers=['x-auth-token', 'Content-Type'])
 @login_required
 def app_create():
     name = request.json['name']
@@ -46,7 +43,6 @@ def app_create():
 
 
 @app.route('/api/apps/<app_key>', methods=['DELETE'])
-@cross_origin(headers=['x-auth-token', 'Content-Type'], methods=['DELETE'])
 @login_required
 @app_permissions(permissions=["w"])
 def remove_application(app_key):
@@ -58,7 +54,6 @@ def remove_application(app_key):
 
 
 @app.route('/api/apps/<app_key>', methods=['GET'])
-@cross_origin(headers=['x-auth-token'])
 @login_required
 def app_info(app_key):
     application = UserApp.query.filter_by(app_key=app_key, user_id=g.user.id).first()
@@ -78,7 +73,6 @@ def get_icon(app_key=None):
 
 
 @app.route('/api/apps/<app_key>/plugin', methods=['GET'])
-@cross_origin(headers=['x-auth-token', 'Content-Type'])
 @login_required
 @app_permissions(permissions=['w', 'r'])
 def get_plugin_config(app_key):
