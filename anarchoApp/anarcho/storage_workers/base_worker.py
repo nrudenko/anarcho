@@ -14,5 +14,8 @@ class BaseStorageWorker(object):
     def get_icon_link(self, app_key):
         pass
 
-    def remove(self, build):
+    def remove_build(self, build):
+        pass
+
+    def remove_app(self, app):
         pass

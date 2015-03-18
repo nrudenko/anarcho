@@ -71,7 +71,12 @@ class LocalStorageWorker(BaseStorageWorker):
     def get_icon_link(self, app_key):
         return self.get_main_url() + "icon/%s" % app_key
 
-    def remove(self, build):
+    def remove_build(self, build):
         path = self.get_build_path(build)
         if os.path.exists(path):
             os.remove(path)
+
+    def remove_app(self, app):
+        path = self.get_app_dir(app.app_key)
+        if os.path.exists(path):
+            shutil.rmtree(path)

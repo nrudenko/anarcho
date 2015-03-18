@@ -49,6 +49,7 @@ def remove_application(app_key):
     application = Application.query.filter_by(app_key=app_key).first()
     if application:
         db.session.delete(application)
+        storage_worker.remove_app(application)
     db.session.commit()
     return Response(status=200)
 
