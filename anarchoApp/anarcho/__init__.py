@@ -66,7 +66,8 @@ def pre_request_logging():
     )
 
 
-from anarcho import apps_views, build_views, upload_view, auth_views, tracking_views, team_views
+#import all available routes from routes submodule
+from anarcho.routes import apps, auth, build, team, tracking, upload
 
 
 @app.route('/')

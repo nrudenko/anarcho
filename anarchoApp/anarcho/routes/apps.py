@@ -10,7 +10,7 @@ from anarcho.models.application import Application
 from anarcho.models.user_app import UserApp
 from flask import request, Response, make_response, g
 from flask.ext.cors import cross_origin
-from storage_workers import LocalStorageWorker
+from anarcho.storage_workers import LocalStorageWorker
 
 
 @app.route('/api/apps', methods=['GET'])
