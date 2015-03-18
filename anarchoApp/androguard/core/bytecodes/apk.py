@@ -3,37 +3,37 @@
 # Copyright (C) 2012, Anthony Desnos <desnos at t0t0.fr>
 # All rights reserved.
 #
-# Androguard is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Lesser General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# Androguard is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
+# http://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU Lesser General Public License
-# along with Androguard.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS-IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
+
+from androguard.core import bytecode
+from androguard.core import androconf
 
 import StringIO
 from struct import pack, unpack
 from xml.sax.saxutils import escape
 from zlib import crc32
-from xml.dom import minidom
-
-import bytecode
-import androconf
-from dvm_permissions import DVM_PERMISSIONS
 import re
 
+from xml.dom import minidom
 
 
+def read(filename, binary=True):
+    with open(filename, 'rb' if binary else 'r') as f:
+        return f.read()
 
 
-
-
+NS_ANDROID_URI = 'http://schemas.android.com/apk/res/android'
 
 # 0: chilkat
 # 1: default python zipfile module
@@ -49,7 +49,7 @@ if sys.hexversion < 0x2070000:
         ZIPMODULE = 0
         # UNLOCK : change it with your valid key !
         try:
-            CHILKAT_KEY = open("key.txt", "rb").read()
+            CHILKAT_KEY = read("key.txt")
         except Exception:
             CHILKAT_KEY = "testme"
 
@@ -58,8 +58,8 @@ if sys.hexversion < 0x2070000:
 else:
     ZIPMODULE = 1
 
-# ################################################## CHILKAT ZIP FORMAT #####################################################
-class ChilkatZip:
+################################################### CHILKAT ZIP FORMAT #####################################################
+class ChilkatZip(object):
     def __init__(self, raw):
         self.files = []
         self.zip = chilkat.CkZip()
@@ -94,7 +94,7 @@ class ChilkatZip:
         entry = self.zip.GetEntryByName(filename)
         if entry != None:
             obj = chilkat.CkByteData()
-            obj.append(buff, len(buff))
+            obj.append2(buff, len(buff))
             return entry.ReplaceData(obj)
         return False
 
@@ -135,8 +135,8 @@ def sign_apk(filename, keystore, storepass):
     stdout, stderr = compile.communicate()
 
 
-# ####################################################### APK FORMAT ########################################################
-class APK:
+######################################################## APK FORMAT ########################################################
+class APK(object):
     """
         This class can access to all elements in an APK file
 
@@ -154,7 +154,7 @@ class APK:
 
         :Example:
           APK("myfile.apk")
-          APK(open("myfile.apk", "rb").read(), raw=True)
+          APK(read("myfile.apk"), raw=True)
     """
 
     def __init__(self, filename, raw=False, mode="r", magic_file=None, zipmodule=ZIPMODULE):
@@ -177,16 +177,14 @@ class APK:
         if raw == True:
             self.__raw = filename
         else:
-            fd = open(filename, "rb")
-            self.__raw = fd.read()
-            fd.close()
+            self.__raw = read(filename)
 
         self.zipmodule = zipmodule
 
         if zipmodule == 0:
             self.zip = ChilkatZip(self.__raw)
         elif zipmodule == 2:
-            import zipfile
+            from androguard.patch import zipfile
 
             self.zip = zipfile.ZipFile(StringIO.StringIO(self.__raw), mode=mode)
         else:
@@ -204,11 +202,13 @@ class APK:
 
                 if self.xml[i] != None:
                     self.package = self.xml[i].documentElement.getAttribute("package")
-                    self.androidversion["Code"] = self.xml[i].documentElement.getAttribute("android:versionCode")
-                    self.androidversion["Name"] = self.xml[i].documentElement.getAttribute("android:versionName")
+                    self.androidversion["Code"] = self.xml[i].documentElement.getAttributeNS(NS_ANDROID_URI,
+                                                                                             "versionCode")
+                    self.androidversion["Name"] = self.xml[i].documentElement.getAttributeNS(NS_ANDROID_URI,
+                                                                                             "versionName")
 
                     for item in self.xml[i].getElementsByTagName('uses-permission'):
-                        self.permissions.append(str(item.getAttribute("android:name")))
+                        self.permissions.append(str(item.getAttributeNS(NS_ANDROID_URI, "name")))
 
                     self.valid_apk = True
 
@@ -383,7 +383,7 @@ class APK:
         l = []
         for i in self.xml:
             for item in self.xml[i].getElementsByTagName(tag_name):
-                value = item.getAttribute(attribute)
+                value = item.getAttributeNS(NS_ANDROID_URI, attribute)
                 value = self.format_value(value)
 
                 l.append(str(value))
@@ -414,7 +414,7 @@ class APK:
         """
         for i in self.xml:
             for item in self.xml[i].getElementsByTagName(tag_name):
-                value = item.getAttribute(attribute)
+                value = item.getAttributeNS(NS_ANDROID_URI, attribute)
 
                 if len(value) > 0:
                     return value
@@ -426,19 +426,20 @@ class APK:
 
             :rtype: string
         """
+        x = set()
+        y = set()
+
         for i in self.xml:
-            x = set()
-            y = set()
             for item in self.xml[i].getElementsByTagName("activity"):
                 for sitem in item.getElementsByTagName("action"):
-                    val = sitem.getAttribute("android:name")
+                    val = sitem.getAttributeNS(NS_ANDROID_URI, "name")
                     if val == "android.intent.action.MAIN":
-                        x.add(item.getAttribute("android:name"))
+                        x.add(item.getAttributeNS(NS_ANDROID_URI, "name"))
 
                 for sitem in item.getElementsByTagName("category"):
-                    val = sitem.getAttribute("android:name")
+                    val = sitem.getAttributeNS(NS_ANDROID_URI, "name")
                     if val == "android.intent.category.LAUNCHER":
-                        y.add(item.getAttribute("android:name"))
+                        y.add(item.getAttributeNS(NS_ANDROID_URI, "name"))
 
         z = x.intersection(y)
         if len(z) > 0:
@@ -451,7 +452,7 @@ class APK:
 
             :rtype: a list of string
         """
-        return self.get_elements("activity", "android:name")
+        return self.get_elements("activity", "name")
 
     def get_services(self):
         """
@@ -459,7 +460,7 @@ class APK:
 
             :rtype: a list of string
         """
-        return self.get_elements("service", "android:name")
+        return self.get_elements("service", "name")
 
     def get_receivers(self):
         """
@@ -467,7 +468,7 @@ class APK:
 
             :rtype: a list of string
         """
-        return self.get_elements("receiver", "android:name")
+        return self.get_elements("receiver", "name")
 
     def get_providers(self):
         """
@@ -475,7 +476,32 @@ class APK:
 
             :rtype: a list of string
         """
-        return self.get_elements("provider", "android:name")
+        return self.get_elements("provider", "name")
+
+    def get_intent_filters(self, category, name):
+        d = {}
+
+        d["action"] = []
+        d["category"] = []
+
+        for i in self.xml:
+            for item in self.xml[i].getElementsByTagName(category):
+                if self.format_value(item.getAttributeNS(NS_ANDROID_URI, "name")) == name:
+                    for sitem in item.getElementsByTagName("intent-filter"):
+                        for ssitem in sitem.getElementsByTagName("action"):
+                            if ssitem.getAttributeNS(NS_ANDROID_URI, "name") not in d["action"]:
+                                d["action"].append(ssitem.getAttributeNS(NS_ANDROID_URI, "name"))
+                        for ssitem in sitem.getElementsByTagName("category"):
+                            if ssitem.getAttributeNS(NS_ANDROID_URI, "name") not in d["category"]:
+                                d["category"].append(ssitem.getAttributeNS(NS_ANDROID_URI, "name"))
+
+        if not d["action"]:
+            del d["action"]
+
+        if not d["category"]:
+            del d["category"]
+
+        return d
 
     def get_permissions(self):
         """
@@ -485,36 +511,13 @@ class APK:
         """
         return self.permissions
 
-    def get_details_permissions(self):
-        """
-            Return permissions with details
-
-            :rtype: list of string
-        """
-        l = {}
-
-        for i in self.permissions:
-            perm = i
-            pos = i.rfind(".")
-
-            if pos != -1:
-                perm = i[pos + 1:]
-
-            try:
-                l[i] = DVM_PERMISSIONS["MANIFEST_PERMISSION"][perm]
-            except KeyError:
-                l[i] = ["dangerous", "Unknown permission from android reference",
-                        "Unknown permission from android reference"]
-
-        return l
-
     def get_max_sdk_version(self):
         """
             Return the android:maxSdkVersion attribute
 
             :rtype: string
         """
-        return self.get_element("uses-sdk", "android:maxSdkVersion")
+        return self.get_element("uses-sdk", "maxSdkVersion")
 
     def get_min_sdk_version(self):
         """
@@ -522,7 +525,7 @@ class APK:
 
             :rtype: string
         """
-        return self.get_element("uses-sdk", "android:minSdkVersion")
+        return self.get_element("uses-sdk", "minSdkVersion")
 
     def get_target_sdk_version(self):
         """
@@ -530,7 +533,7 @@ class APK:
 
             :rtype: string
         """
-        return self.get_element("uses-sdk", "android:targetSdkVersion")
+        return self.get_element("uses-sdk", "targetSdkVersion")
 
     def get_libraries(self):
         """
@@ -538,7 +541,7 @@ class APK:
 
             :rtype: list
         """
-        return self.get_elements("uses-library", "android:name")
+        return self.get_elements("uses-library", "name")
 
     def get_certificate(self, filename):
         """
@@ -548,10 +551,11 @@ class APK:
 
         cert = chilkat.CkCert()
         f = self.get_file(filename)
-
-        success = cert.LoadFromBinary(f, len(f))
-
+        data = chilkat.CkByteData()
+        data.append2(f, len(f))
+        success = cert.LoadFromBinary(data)
         return success, cert
+
 
     def new_zip(self, filename, deleted_files=None, new_files={}):
         """
@@ -566,7 +570,7 @@ class APK:
             :type new_files: a dictionnary (key:filename, value:content of the file)
         """
         if self.zipmodule == 2:
-            import zipfile
+            from androguard.patch import zipfile
 
             zout = zipfile.ZipFile(filename, 'w')
         else:
@@ -621,6 +625,20 @@ class APK:
             except KeyError:
                 return None
 
+    def get_signature_name(self):
+        signature_expr = re.compile("^(META-INF/)(.*)(\.RSA|\.DSA)$")
+        for i in self.get_files():
+            if signature_expr.search(i):
+                return i
+        return None
+
+    def get_signature(self):
+        signature_expr = re.compile("^(META-INF/)(.*)(\.RSA|\.DSA)$")
+        for i in self.get_files():
+            if signature_expr.search(i):
+                return self.get_file(i)
+        return None
+
     def show(self):
         self.get_files_types()
 
@@ -636,34 +654,50 @@ class APK:
         for i in details_permissions:
             print "\t", i, details_permissions[i]
         print "MAIN ACTIVITY: ", self.get_main_activity()
-        print "ACTIVITIES: ", self.get_activities()
-        print "SERVICES: ", self.get_services()
-        print "RECEIVERS: ", self.get_receivers()
+
+        print "ACTIVITIES: "
+        activities = self.get_activities()
+        for i in activities:
+            filters = self.get_intent_filters("activity", i)
+            print "\t", i, filters or ""
+
+        print "SERVICES: "
+        services = self.get_services()
+        for i in services:
+            filters = self.get_intent_filters("service", i)
+            print "\t", i, filters or ""
+
+        print "RECEIVERS: "
+        receivers = self.get_receivers()
+        for i in receivers:
+            filters = self.get_intent_filters("receiver", i)
+            print "\t", i, filters or ""
+
         print "PROVIDERS: ", self.get_providers()
 
 
 def show_Certificate(cert):
     print "Issuer: C=%s, CN=%s, DN=%s, E=%s, L=%s, O=%s, OU=%s, S=%s" % (
-        cert.issuerC(), cert.issuerCN(), cert.issuerDN(), cert.issuerE(), cert.issuerL(), cert.issuerO(),
-        cert.issuerOU(),
-        cert.issuerS())
+    cert.issuerC(), cert.issuerCN(), cert.issuerDN(), cert.issuerE(), cert.issuerL(), cert.issuerO(), cert.issuerOU(),
+    cert.issuerS())
     print "Subject: C=%s, CN=%s, DN=%s, E=%s, L=%s, O=%s, OU=%s, S=%s" % (
-        cert.subjectC(), cert.subjectCN(), cert.subjectDN(), cert.subjectE(), cert.subjectL(), cert.subjectO(),
-        cert.subjectOU(), cert.subjectS())
+    cert.subjectC(), cert.subjectCN(), cert.subjectDN(), cert.subjectE(), cert.subjectL(), cert.subjectO(),
+    cert.subjectOU(), cert.subjectS())
 
 
-# ####################################################### AXML FORMAT ########################################################
+######################################################## AXML FORMAT ########################################################
 # Translated from http://code.google.com/p/android4me/source/browse/src/android/content/res/AXmlResourceParser.java
 
 UTF8_FLAG = 0x00000100
+CHUNK_STRINGPOOL_TYPE = 0x001C0001
+CHUNK_NULL_TYPE = 0x00000000
 
 
-class StringBlock:
+class StringBlock(object):
     def __init__(self, buff):
         self.start = buff.get_idx()
         self._cache = {}
-        self.header = unpack('<h', buff.read(2))[0]
-        self.header_size = unpack('<h', buff.read(2))[0]
+        self.header_size, self.header = self.skipNullPadding(buff)
 
         self.chunkSize = unpack('<i', buff.read(4))[0]
         self.stringCount = unpack('<i', buff.read(4))[0]
@@ -706,6 +740,21 @@ class StringBlock:
 
             for i in range(0, size / 4):
                 self.m_styles.append(unpack('<i', buff.read(4))[0])
+
+    def skipNullPadding(self, buff):
+        def readNext(buff, first_run=True):
+            header = unpack('<i', buff.read(4))[0]
+
+            if header == CHUNK_NULL_TYPE and first_run:
+                androconf.info("Skipping null padding in StringBlock header")
+                header = readNext(buff, first_run=False)
+            elif header != CHUNK_STRINGPOOL_TYPE:
+                androconf.warning("Invalid StringBlock header")
+
+            return header
+
+        header = readNext(buff)
+        return header >> 8, header & 0xFF
 
     def getString(self, idx):
         if idx in self._cache:
@@ -814,23 +863,32 @@ END_TAG = 3
 TEXT = 4
 
 
-class AXMLParser:
+class AXMLParser(object):
     def __init__(self, raw_buff):
         self.reset()
 
+        self.valid_axml = True
         self.buff = bytecode.BuffHandle(raw_buff)
 
-        self.buff.read(4)
-        self.buff.read(4)
+        axml_file = unpack('<L', self.buff.read(4))[0]
 
-        self.sb = StringBlock(self.buff)
+        if axml_file == CHUNK_AXML_FILE:
+            self.buff.read(4)
 
-        self.m_resourceIDs = []
-        self.m_prefixuri = {}
-        self.m_uriprefix = {}
-        self.m_prefixuriL = []
+            self.sb = StringBlock(self.buff)
 
-        self.visited_ns = []
+            self.m_resourceIDs = []
+            self.m_prefixuri = {}
+            self.m_uriprefix = {}
+            self.m_prefixuriL = []
+
+            self.visited_ns = []
+        else:
+            self.valid_axml = False
+            androconf.warning("Not a valid xml file")
+
+    def is_valid(self):
+        return self.valid_axml
 
     def reset(self):
         self.m_event = -1
@@ -873,7 +931,7 @@ class AXMLParser:
                 chunkSize = unpack('<L', self.buff.read(4))[0]
                 # FIXME
                 if chunkSize < 8 or chunkSize % 4 != 0:
-                    androconf.warning("ooo")
+                    androconf.warning("Invalid chunk size")
 
                 for i in range(0, chunkSize / 4 - 2):
                     self.m_resourceIDs.append(unpack('<L', self.buff.read(4))[0])
@@ -882,7 +940,7 @@ class AXMLParser:
 
             # FIXME
             if chunkType < CHUNK_XML_FIRST or chunkType > CHUNK_XML_LAST:
-                androconf.warning("ooo")
+                androconf.warning("invalid chunk type")
 
             # Fake START_DOCUMENT event.
             if chunkType == CHUNK_XML_START_TAG and event == -1:
@@ -907,8 +965,8 @@ class AXMLParser:
                     self.buff.read(4)
                     self.buff.read(4)
                     (prefix, uri) = self.m_prefixuriL.pop()
-                    # del self.m_prefixuri[ prefix ]
-                    # del self.m_uriprefix[ uri ]
+                    #del self.m_prefixuri[ prefix ]
+                    #del self.m_uriprefix[ uri ]
 
                 continue
 
@@ -991,7 +1049,7 @@ class AXMLParser:
         for i in self.m_uriprefix:
             if i not in self.visited_ns:
                 buff += "xmlns:%s=\"%s\"\n" % (
-                    self.sb.getString(self.m_uriprefix[i]), self.sb.getString(self.m_prefixuri[self.m_uriprefix[i]]))
+                self.sb.getString(self.m_uriprefix[i]), self.sb.getString(self.m_prefixuri[self.m_uriprefix[i]]))
                 self.visited_ns.append(i)
         return buff
 
@@ -1052,8 +1110,8 @@ class AXMLParser:
             return self.sb.getString(valueString)
         # WIP
         return ""
-        # int valueData=m_attributes[offset+ATTRIBUTE_IX_VALUE_DATA];
-        # return TypedValue.coerceToString(valueType,valueData);
+        #int valueData=m_attributes[offset+ATTRIBUTE_IX_VALUE_DATA];
+        #return TypedValue.coerceToString(valueType,valueData);
 
 
 TYPE_ATTRIBUTE = 2
@@ -1086,16 +1144,16 @@ def complexToFloat(xcomplex):
     return (float)(xcomplex & 0xFFFFFF00) * RADIX_MULTS[(xcomplex >> 4) & 3]
 
 
-class AXMLPrinter:
+class AXMLPrinter(object):
     def __init__(self, raw_buff):
         self.axml = AXMLParser(raw_buff)
         self.xmlns = False
 
         self.buff = u''
 
-        while True:
+        while True and self.axml.is_valid():
             _type = self.axml.next()
-            # print "tagtype = ", _type
+            #           print "tagtype = ", _type
 
             if _type == START_DOCUMENT:
                 self.buff += u'<?xml version="1.0" encoding="utf-8"?>\n'
@@ -1104,14 +1162,14 @@ class AXMLPrinter:
                 self.buff += self.axml.getXMLNS()
 
                 for i in range(0, self.axml.getAttributeCount()):
-                    self.buff += "%s%s=\"%s\"\n" % ( self.getPrefix(
+                    self.buff += "%s%s=\"%s\"\n" % (self.getPrefix(
                         self.axml.getAttributePrefix(i)), self.axml.getAttributeName(i),
-                                                     self._escape(self.getAttributeValue(i)) )
+                                                    self._escape(self.getAttributeValue(i)))
 
                 self.buff += u'>\n'
 
             elif _type == END_TAG:
-                self.buff += "</%s%s>\n" % ( self.getPrefix(self.axml.getPrefix()), self.axml.getName() )
+                self.buff += "</%s%s>\n" % (self.getPrefix(self.axml.getPrefix()), self.axml.getName())
 
             elif _type == TEXT:
                 self.buff += "%s\n" % self.axml.getText()
@@ -1132,7 +1190,7 @@ class AXMLPrinter:
         return self.buff.encode('utf-8')
 
     def get_xml(self):
-        return minidom.parseString(self.get_buff()).toprettyxml()
+        return minidom.parseString(self.get_buff()).toprettyxml(encoding="utf-8")
 
     def get_xml_obj(self):
         return minidom.parseString(self.get_buff())
@@ -1211,16 +1269,16 @@ RES_TABLE_TYPE_TYPE = 0x0201
 RES_TABLE_TYPE_SPEC_TYPE = 0x0202
 
 
-class ARSCParser:
+class ARSCParser(object):
     def __init__(self, raw_buff):
         self.analyzed = False
         self.buff = bytecode.BuffHandle(raw_buff)
-        # print "SIZE", hex(self.buff.size())
+        #print "SIZE", hex(self.buff.size())
 
         self.header = ARSCHeader(self.buff)
         self.packageCount = unpack('<i', self.buff.read(4))[0]
 
-        # print hex(self.packageCount)
+        #print hex(self.packageCount)
 
         self.stringpool_main = StringBlock(self.buff)
 
@@ -1237,9 +1295,9 @@ class ARSCParser:
             mTableStrings = StringBlock(self.buff)
             mKeyStrings = StringBlock(self.buff)
 
-            # self.stringpool_main.show()
-            # self.mTableStrings.show()
-            # self.mKeyStrings.show()
+            #self.stringpool_main.show()
+            #self.mTableStrings.show()
+            #self.mKeyStrings.show()
 
             self.packages[package_name].append(current_package)
             self.packages[package_name].append(mTableStrings)
@@ -1253,8 +1311,7 @@ class ARSCParser:
                 self.packages[package_name].append(header)
 
                 if header.type == RES_TABLE_TYPE_SPEC_TYPE:
-                    spec = ARSCResTypeSpec(self.buff, pc)
-                    self.packages[package_name].append(spec)
+                    self.packages[package_name].append(ARSCResTypeSpec(self.buff, pc))
 
                 elif header.type == RES_TABLE_TYPE_TYPE:
                     a_res_type = ARSCResType(self.buff, pc)
@@ -1276,7 +1333,6 @@ class ARSCParser:
                             self.packages[package_name].append(ate)
 
                 elif header.type == RES_TABLE_PACKAGE_TYPE:
-                    print 'PACKAGE'
                     break
                 else:
                     androconf.warning("unknown type")
@@ -1312,7 +1368,7 @@ class ARSCParser:
                             if entry != -1:
                                 ate = self.packages[package_name][nb + 3 + nb_i]
 
-                                # print ate.is_public(), a_res_type.get_type(), ate.get_value(), hex(ate.mResId)
+                                #print ate.is_public(), a_res_type.get_type(), ate.get_value(), hex(ate.mResId)
                                 if ate.get_index() != -1:
                                     c_value["public"].append((a_res_type.get_type(), ate.get_value(), ate.mResId))
 
@@ -1339,11 +1395,8 @@ class ARSCParser:
                                 elif a_res_type.get_type() == "dimen":
                                     c_value["dimen"].append(self.get_resource_dimen(ate))
 
-                                elif a_res_type.get_type() == "drawable":
-                                    c_value["drawable"].append(self.get_resource_drawable(ate))
-
-                                # elif a_res_type.get_type() == "style":
-                                # c_value["style"].append(self.get_resource_style(ate))
+                                #elif a_res_type.get_type() == "style":
+                                #    c_value["style"].append(self.get_resource_style(ate))
 
                                 nb_i += 1
                 nb += 1
@@ -1373,12 +1426,12 @@ class ARSCParser:
     def get_resource_color(self, ate):
         entry_data = ate.key.get_data()
         return [ate.get_value(), "#%02x%02x%02x%02x" % (
-            ((entry_data >> 24) & 0xFF), ((entry_data >> 16) & 0xFF), ((entry_data >> 8) & 0xFF), (entry_data & 0xFF))]
+        ((entry_data >> 24) & 0xFF), ((entry_data >> 16) & 0xFF), ((entry_data >> 8) & 0xFF), (entry_data & 0xFF))]
 
     def get_resource_dimen(self, ate):
         try:
             return [ate.get_value(), "%s%s" % (
-                complexToFloat(ate.key.get_data()), DIMENSION_UNITS[ate.key.get_data() & COMPLEX_UNIT_MASK])]
+            complexToFloat(ate.key.get_data()), DIMENSION_UNITS[ate.key.get_data() & COMPLEX_UNIT_MASK])]
         except Exception, why:
             androconf.warning(why.__str__())
             return [ate.get_value(), ate.key.get_data()]
@@ -1386,9 +1439,6 @@ class ARSCParser:
     # FIXME
     def get_resource_style(self, ate):
         return ["", ""]
-
-    def get_resource_drawable(self, ate):
-        return [ate.get_value(), ate.get_key_data()]
 
     def get_packages_names(self):
         return self.packages.keys()
@@ -1564,21 +1614,12 @@ class ARSCParser:
         except KeyError:
             return None
 
-    def get_drawable(self, package_name, name):
-        self._analyse()
-
-        drawables = []
-        for i in self.values[package_name]["\x00\x00"]["drawable"]:
-            if i[0] == name:
-                drawables.append(i)
-        return drawables
-
     def get_items(self, package_name):
         self._analyse()
         return self.packages[package_name]
 
 
-class PackageContext:
+class PackageContext(object):
     def __init__(self, current_package, stringpool_main, mTableStrings, mKeyStrings):
         self.stringpool_main = stringpool_main
         self.mTableStrings = mTableStrings
@@ -1592,16 +1633,17 @@ class PackageContext:
         self.current_package.mResId = mResId
 
 
-class ARSCHeader:
+class ARSCHeader(object):
     def __init__(self, buff):
         self.start = buff.get_idx()
         self.type = unpack('<h', buff.read(2))[0]
         self.header_size = unpack('<h', buff.read(2))[0]
         self.size = unpack('<i', buff.read(4))[0]
-        # print "ARSCHeader", hex(self.start), hex(self.type), hex(self.header_size), hex(self.size)
+
+        #print "ARSCHeader", hex(self.start), hex(self.type), hex(self.header_size), hex(self.size)
 
 
-class ARSCResTablePackage:
+class ARSCResTablePackage(object):
     def __init__(self, buff):
         self.start = buff.get_idx()
         self.id = unpack('<i', buff.read(4))[0]
@@ -1612,7 +1654,7 @@ class ARSCResTablePackage:
         self.lastPublicKey = unpack('<i', buff.read(4))[0]
         self.mResId = self.id << 24
 
-        # print "ARSCResTablePackage", hex(self.start), hex(self.id), hex(self.mResId), repr(self.name.decode("utf-16", errors='replace')), hex(self.typeStrings), hex(self.lastPublicType), hex(self.keyStrings), hex(self.lastPublicKey)
+        #print "ARSCResTablePackage", hex(self.start), hex(self.id), hex(self.mResId), repr(self.name.decode("utf-16", errors='replace')), hex(self.typeStrings), hex(self.lastPublicType), hex(self.keyStrings), hex(self.lastPublicKey)
 
     def get_name(self):
         name = self.name.decode("utf-16", 'replace')
@@ -1620,7 +1662,7 @@ class ARSCResTablePackage:
         return name
 
 
-class ARSCResTypeSpec:
+class ARSCResTypeSpec(object):
     def __init__(self, buff, parent=None):
         self.start = buff.get_idx()
         self.parent = parent
@@ -1629,14 +1671,14 @@ class ARSCResTypeSpec:
         self.res1 = unpack('<h', buff.read(2))[0]
         self.entryCount = unpack('<i', buff.read(4))[0]
 
-        # print "ARSCResTypeSpec", hex(self.start), hex(self.id), hex(self.res0), hex(self.res1), hex(self.entryCount), "table:" + self.parent.mTableStrings.getString(self.id - 1)
+        #print "ARSCResTypeSpec", hex(self.start), hex(self.id), hex(self.res0), hex(self.res1), hex(self.entryCount), "table:" + self.parent.mTableStrings.getString(self.id - 1)
 
         self.typespec_entries = []
         for i in range(0, self.entryCount):
             self.typespec_entries.append(unpack('<i', buff.read(4))[0])
 
 
-class ARSCResType:
+class ARSCResType(object):
     def __init__(self, buff, parent=None):
         self.start = buff.get_idx()
         self.parent = parent
@@ -1648,7 +1690,7 @@ class ARSCResType:
         self.mResId = (0xff000000 & self.parent.get_mResId()) | self.id << 16
         self.parent.set_mResId(self.mResId)
 
-        # print "ARSCResType", hex(self.start), hex(self.id), hex(self.res0), hex(self.res1), hex(self.entryCount), hex(self.entriesStart), hex(self.mResId), "table:" + self.parent.mTableStrings.getString(self.id - 1)
+        #print "ARSCResType", hex(self.start), hex(self.id), hex(self.res0), hex(self.res1), hex(self.entryCount), hex(self.entriesStart), hex(self.mResId), "table:" + self.parent.mTableStrings.getString(self.id - 1)
 
         self.config = ARSCResTableConfig(buff)
 
@@ -1656,7 +1698,7 @@ class ARSCResType:
         return self.parent.mTableStrings.getString(self.id - 1)
 
 
-class ARSCResTableConfig:
+class ARSCResTableConfig(object):
     def __init__(self, buff):
         self.start = buff.get_idx()
         self.size = unpack('<i', buff.read(4))[0]
@@ -1678,10 +1720,10 @@ class ARSCResTableConfig:
 
         self.exceedingSize = self.size - 36
         if self.exceedingSize > 0:
-            androconf.warning("too much bytes !")
+            androconf.info("Skipping padding bytes!")
             self.padding = buff.read(self.exceedingSize)
 
-            # print "ARSCResTableConfig", hex(self.start), hex(self.size), hex(self.imsi), hex(self.locale), repr(self.get_language()), repr(self.get_country()), hex(self.screenType), hex(self.input), hex(self.screenSize), hex(self.version), hex(self.screenConfig), hex(self.screenSizeDp)
+            #print "ARSCResTableConfig", hex(self.start), hex(self.size), hex(self.imsi), hex(self.locale), repr(self.get_language()), repr(self.get_country()), hex(self.screenType), hex(self.input), hex(self.screenSize), hex(self.version), hex(self.screenConfig), hex(self.screenSizeDp)
 
     def get_language(self):
         x = self.locale & 0x0000ffff
@@ -1692,7 +1734,7 @@ class ARSCResTableConfig:
         return chr(x & 0x00ff) + chr((x & 0xff00) >> 8)
 
 
-class ARSCResTableEntry:
+class ARSCResTableEntry(object):
     def __init__(self, buff, mResId, parent=None):
         self.start = buff.get_idx()
         self.mResId = mResId
@@ -1701,7 +1743,8 @@ class ARSCResTableEntry:
         self.flags = unpack('<h', buff.read(2))[0]
         self.index = unpack('<i', buff.read(4))[0]
 
-        # print "ARSCResTableEntry", hex(self.start), hex(self.mResId), hex(self.size), hex(self.flags), hex(self.index), self.is_complex()#, hex(self.mResId)
+        #print "ARSCResTableEntry", hex(self.start), hex(self.mResId), hex(self.size), hex(self.flags), hex(self.index), self.is_complex()#, hex(self.mResId)
+
         if self.flags & 1:
             self.item = ARSCComplex(buff, parent)
         else:
@@ -1723,7 +1766,7 @@ class ARSCResTableEntry:
         return (self.flags & 1) == 1
 
 
-class ARSCComplex:
+class ARSCComplex(object):
     def __init__(self, buff, parent=None):
         self.start = buff.get_idx()
         self.parent = parent
@@ -1733,12 +1776,12 @@ class ARSCComplex:
 
         self.items = []
         for i in range(0, self.count):
-            item = (unpack('<i', buff.read(4))[0], ARSCResStringPoolRef(buff, self.parent))
-            self.items.append(item)
-            # print "ARSCComplex", hex(self.start), self.id_parent, self.count, repr(self.parent.mKeyStrings.getString(self.id_parent))
+            self.items.append((unpack('<i', buff.read(4))[0], ARSCResStringPoolRef(buff, self.parent)))
+
+            #print "ARSCComplex", hex(self.start), self.id_parent, self.count, repr(self.parent.mKeyStrings.getString(self.id_parent))
 
 
-class ARSCResStringPoolRef:
+class ARSCResStringPoolRef(object):
     def __init__(self, buff, parent=None):
         self.start = buff.get_idx()
         self.parent = parent
@@ -1747,7 +1790,7 @@ class ARSCResStringPoolRef:
         self.data_type = unpack('<b', buff.read(1))[0]
         self.data = unpack('<i', buff.read(4))[0]
 
-        # print "ARSCResStringPoolRef", hex(self.start), hex(self.data_type), hex(self.data)#, "key:" + self.parent.mKeyStrings.getString(self.index), self.parent.stringpool_main.getString(self.data)
+        #print "ARSCResStringPoolRef", hex(self.start), hex(self.data_type), hex(self.data)#, "key:" + self.parent.mKeyStrings.getString(self.index), self.parent.stringpool_main.getString(self.data)
 
     def get_data_value(self):
         return self.parent.stringpool_main.getString(self.data)
@@ -1757,3 +1800,22 @@ class ARSCResStringPoolRef:
 
     def get_data_type(self):
         return self.data_type
+
+
+def get_arsc_info(arscobj):
+    buff = ""
+    for package in arscobj.get_packages_names():
+        buff += package + ":\n"
+        for locale in arscobj.get_locales(package):
+            buff += "\t" + repr(locale) + ":\n"
+            for ttype in arscobj.get_types(package, locale):
+                buff += "\t\t" + ttype + ":\n"
+                try:
+                    tmp_buff = getattr(arscobj, "get_" + ttype + "_resources")(package, locale).decode("utf-8",
+                                                                                                       'replace').split(
+                        "\n")
+                    for i in tmp_buff:
+                        buff += "\t\t\t" + i + "\n"
+                except AttributeError:
+                    pass
+    return buff
