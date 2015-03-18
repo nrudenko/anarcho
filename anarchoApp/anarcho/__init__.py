@@ -79,27 +79,7 @@ def after_request(response):
     return response
 
 
-from anarcho import apps_views, build_views, upload_view, auth_views, tracking_views, team_views
+#import all availalbe routes from routes submodule
+from anarcho.routes import apps, build, upload, auth, tracking, team, general
 
 
-@app.route('/')
-def index():
-    return app.send_static_file("index.html")
-
-
-@app.route('/api/cert', methods=['GET'])
-def cert():
-    return send_file(app.config['SSL_PATH']['crt'],
-                     mimetype='application/x-x509-server-cert',
-                     as_attachment=True)
-
-
-@app.route('/api/ping', methods=['GET'])
-def ping():
-    return Response(__version__(), status=200)
-
-
-@app.errorhandler(404)
-@app.errorhandler(405)
-def stub(e):
-    return redirect("/404.html")
