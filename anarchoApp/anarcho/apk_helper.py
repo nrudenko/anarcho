@@ -1,7 +1,7 @@
+from uuid import uuid4
+
 from androguard.core.bytecodes.apk import APK
 import os
-
-from anarcho.models.build import Build
 
 
 def save_file_from_apk(apk_file, file_name, dest):
@@ -11,26 +11,31 @@ def save_file_from_apk(apk_file, file_name, dest):
     out.close()
 
 
-def save_icon(apk_file, package, icon_dest):
-    icon_hex_id = apk_file.get_element("application", "icon")
+def save_icon(apk, package):
+    icon_hex_id = apk.get_element("application", "icon")
     icon_id = int(icon_hex_id.replace("@", ""), 16)
-    icon_name = apk_file.get_android_resources().get_id(package, icon_id)[1]
-    icons = [x for x in apk_file.files if icon_name in x]
+    icon_name = apk.get_android_resources().get_id(package, icon_id)[1]
+    icons = [x for x in apk.files if icon_name in x]
+
+    tmp_icon_path = os.path.join(os.path.dirname(apk.filename), "%s_icon.png" % str(uuid4()))
+
     if len(icons) > 0:
-        save_file_from_apk(apk_file, icons[-1], icon_dest)
+        save_file_from_apk(apk, icons[-1], tmp_icon_path)
+    else:
+        tmp_icon_path = None
+
+    return tmp_icon_path
 
 
-def parse_apk(apk_path, app_key):
-    apk_file = APK(apk_path)
+def parse_apk(apk_path):
+    apk = APK(apk_path)
 
-    package = apk_file.get_package()
-    version_code = apk_file.get_androidversion_code()
-    version_name = apk_file.get_androidversion_name()
+    package = apk.get_package()
+    version_code = apk.get_androidversion_code()
+    version_name = apk.get_androidversion_name()
+    tmp_icon = save_icon(apk, package)
 
-    icon_dest = os.path.join(os.path.dirname(apk_path), "%s_icon.png" % app_key)
-    try:
-        save_icon(apk_file, package, icon_dest)
-    except Exception:
-        icon_dest = None
-    build = Build(app_key, version_code, version_name)
-    return {"build": build, "icon_path": icon_dest, "package": package}
+    return {"version_code": version_code,
+            "version_name": version_name,
+            "tmp_icon": tmp_icon,
+            "package": package}
