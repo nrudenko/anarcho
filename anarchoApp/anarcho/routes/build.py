@@ -18,7 +18,7 @@ def delete_builds_list(app_key):
     builds = Build.query.filter(Build.app_key == app_key, Build.id.in_(ids)).all()
     for b in builds:
         db.session.delete(b)
-        storage_worker.remove(b)
+        storage_worker.remove_build(b)
     db.session.commit()
     return Response(status=200)
 
