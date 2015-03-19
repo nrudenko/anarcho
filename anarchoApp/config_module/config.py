@@ -15,8 +15,8 @@ PORT_SECURE = 5443
 # should looks like "world_visible_host.com"
 HOST = '<PUT_CORRECT_HOST>'
 
-PUBLIC_HOST = 'http://{0}'.format(HOST)
-PUBLIC_HOST_SECURE = 'https://{0}'.format(HOST)
+PUBLIC_HOST = 'http://{0}{1}'.format(HOST, PORT)
+PUBLIC_HOST_SECURE = 'https://{0}{1}'.format(HOST, PORT_SECURE)
 
 SSL_PATH = {
     'crt': join(anarcho_dir, 'anarcho_server.crt'),
