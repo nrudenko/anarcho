@@ -1,7 +1,7 @@
 <div ng-controller="AppTeamCtrl" class="text-left">
     <p>Team:</p>
     <table class="table table-hover table-bordered">
-        <tr ng-repeat="u in permissions" vertical-align="middle">
+        <tr ng-repeat="u in permissions">
             <td width="50%">
                 {{ u.username }}
             </td>
@@ -18,7 +18,7 @@
                 </select>
             </td>
             <td ng-show="canWrite()">
-                <a class="btn btn-danger" ng-click="revokeUser(u)">Remove</a>
+                <a class="btn btn-danger btn-xs" ng-click="revokeUser(u)">Remove</a>
             </td>
         </tr>
     </table>
@@ -35,10 +35,10 @@
         <p ng-switch-when="invalid_email_length">Is User real has so long email!?<br>How does He remember it?</p>
 
     </div>
-    <form name="addUserForm" ng-show="canWrite()" ng-submit="addUser(user_app)" novalidate>
-        <div class="form-inline text-right" ng-init="user_app.app_key=app.app_key;user_app.permission='r'">
-            <label>Invite user to {{app.name}}: </label>
-            <input class="form-control" type="text" id="username"
+    <form class="form-inline pull-right" name="addUserForm" ng-show="canWrite()" ng-submit="addUser(user_app)" novalidate>
+        <div class="form-group text-right" ng-init="user_app.app_key=app.app_key;user_app.permission='r'">
+            <label for="username">Invite user to {{app.name}}: </label>
+            <input id="username" class="form-control" type="text" placeholder="Enter email"
                    ng-model="user_app.email">
             <button class="btn btn-default" type="submit">Invite</button>
         </div>
