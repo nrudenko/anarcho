@@ -35,9 +35,9 @@ var AppTypeIcon = function () {
                 var type = attrs['appTypeIcon'];
                 element.css('display', 'initial');
                 if (type === 'andr') {
-                    element.attr('src', 'images/droid_logo.png');
+                    element.attr('src', 'images/icon_droid.png');
                 } else if (type === 'ios') {
-                    element.attr('src', 'images/ios_logo.png');
+                    element.attr('src', 'images/icon_apple.png');
                 } else {
                     element.css('display', 'none');
                 }

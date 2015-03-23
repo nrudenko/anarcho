@@ -9,14 +9,17 @@
     <p class="text-muted">Your apps:</p>
 
     <div ng-repeat="a in apps">
-        <a href="#/apps/{{ a.app_key }}">
-            <div class="btn-default list-group-item app-item-container">
-                <img icon-src="{{ a.icon_url }}" class="app-icon">
-                <img app-type-icon="{{a.app_type}}" class="app-label-icon">
+        <div class="btn-default list-group-item app-item-container">
+            <a href="#/apps/{{ a.app_key }}">
+                <div tooltip="{{ a.name }}">
+                    <img icon-src="{{ a.icon_url }}" class="app-icon">
+                    <img app-type-icon="{{ a.app_type }}" class="app-label-icon">
 
-                <p class="text-center">{{ a.name }} </p>
-            </div>
-        </a>
+                    <p class="text-center ellipsis-text">{{ a.name }} </p>
+                </div>
+            </a>
+        </div>
+
     </div>
 
 </div>

@@ -190,3 +190,7 @@ def main():
     if args['gen_cert']:
         gen_cert(args['<HOST>'], args['<CERT_NAME>'])
         pass
+
+
+if __name__ == '__main__':
+    main()
