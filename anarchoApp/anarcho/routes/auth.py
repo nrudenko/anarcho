@@ -147,7 +147,7 @@ def login():
           required: true
     responses:
         200:
-            description: auth token
+            description: Login successful
             schema:
                 type: object
                 required:
