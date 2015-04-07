@@ -79,7 +79,5 @@ def after_request(response):
     return response
 
 
-#import all availalbe routes from routes submodule
+# import all available routes from routes submodule
 from anarcho.routes import apps, build, upload, auth, tracking, team, general, swagger
-
-
