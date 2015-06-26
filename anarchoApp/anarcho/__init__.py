@@ -2,12 +2,13 @@ from datetime import datetime
 import uuid
 import logging
 
+from anarcho.view_utils import AnarchoApiException
 from flask.ext.cors import cross_origin
 
 from os.path import expanduser
 import os
 from flask.ext.sqlalchemy import SQLAlchemy
-from flask import Flask, redirect, request, Response, send_file
+from flask import Flask, request, make_response
 
 
 def __version__():
@@ -67,9 +68,15 @@ def pre_request_logging():
     )
 
 
+@app.errorhandler(AnarchoApiException)
+def error_handling(error):
+    print error.message
+    return make_response('{"error":"' + error.message + '"}', error.status_code)
+
+
 @app.after_request
 @cross_origin(headers=['x-auth-token', 'Content-Type'],
-              methods=['PATCH', 'DELETE'])
+              methods=['PATCH', 'DELETE', 'PUT'])
 def after_request(response):
     """
     Apply CORS for all requests
@@ -79,7 +86,9 @@ def after_request(response):
     return response
 
 
-#import all availalbe routes from routes submodule
-from anarcho.routes import apps, build, upload, auth, tracking, team, general, swagger
+from anarcho.views.auth import auth
 
+app.register_blueprint(auth)
 
+# import all availalbe routes from routes submodule
+from anarcho.routes import apps, build, upload, tracking, team, general, swagger

@@ -1,13 +1,16 @@
-import re
-from anarcho import app, db
+from anarcho import db
 from anarcho.access_manager import login_required
-from anarcho.models.token import Token
 from anarcho.serializer import serialize
-from anarcho.models.user import User
-from flask import request, g, Response, make_response
+from anarcho.services.exceptions import UserServiceException, UserNotAuthorized, UserAlreadyExist
+from anarcho.services.user_service import UserService
+from anarcho.view_utils import AnarchoApiException
+from flask import request, g, Blueprint
+from werkzeug.exceptions import BadRequest
+
+auth = Blueprint("auth", __name__, url_prefix="/api")
 
 
-@app.route('/api/register', methods=['POST'])
+@auth.route('/user', methods=['PUT'])
 def register():
     """
     Register user
@@ -51,9 +54,9 @@ def register():
                         type: string
             examples:
                 application/json:
-                    error: user_already_registered
-        403:
-            description: Different errors
+                    - error:user_already_exist
+        400:
+            description: Data validation errors
             schema:
                 type: object
                 required:
@@ -63,73 +66,30 @@ def register():
                         type: string
             examples:
                 application/json:
-                    - error: invalid_user_name
-                    - error: user_name_is_empty
-                    - error: invalid_user_name_length
-                    - error: invalid_email
-                    - error: email_is_empty
-                    - error: invalid_email_format
-                    - error: invalid_email_length
-                    - error: invalid_password
-                    - error: empty_password
-                    - error: invalid_password_length
+                    - error:username_length_is_wrong
+                    - error:email_format_is_wrong
+                    - error:password_is_empty
+                    - error:password_is_too_short
     """
-    if 'name' in request.json:
-        name = request.json['name']
-    else:
-        return make_response('{"error":"invalid_user_name"}', 403)
+    request_params = request.json
+    if not request_params:
+        raise BadRequest()
 
-    if name.isspace() or len(name) < 1:
-        return make_response('{"error":"user_name_is_empty"}', 403)
-    elif len(name) > 20:
-        return make_response('{"error":"invalid_user_name_length"}', 403)
-
-    if 'email' in request.json:
-        email = request.json['email'].lower()
-    else:
-        return make_response('{"error":"invalid_email"}', 403)
-
-    email_match = re.match(r'\w[\w\.-]*@\w[\w\.-]+\.\w+', email)
-
-    if email.isspace() or len(email) < 1:
-        return make_response('{"error":"email_is_empty"}', 403)
-    elif not email_match:
-        return make_response('{"error":"invalid_email_format"}', 403)
-    elif len(email) > 25:
-        return make_response('{"error":"invalid_email_length"}', 403)
-
-    if 'password' in request.json:
-        password = request.json['password']
-    else:
-        return make_response('{"error":"invalid_password"}', 403)
-
-    if password.isspace():
-        return make_response('{"error":"empty_password"}', 403)
-    elif len(password) < 6:
-        return make_response('{"error":"invalid_password_length"}', 403)
-
-    u = User.query.filter(User.email == email).first()
-    if not u or not u.name:
-        user = None
-        if not u:
-            user = User(email, name, password)
-            db.session.add(user)
-            db.session.commit()
-        else:
-            user = u
-            user.name = name
-            user.hash_password(password)
-            db.session.commit()
-
-        token = Token(user)
-        db.session.add(token)
-        db.session.commit()
+    name = request_params.get('name')
+    email = request_params.get('email')
+    password = request_params.get('password')
+    try:
+        user_service = UserService(db)
+        user_service.create_user(name, email, password)
+        token = user_service.authenticate(email, password)
         return serialize(token)
+    except UserAlreadyExist as e:
+        raise AnarchoApiException(e, 409)
+    except UserServiceException as e:
+        raise AnarchoApiException(e)
 
-    return Response('{"error":"user_already_registered"}', 409)
 
-
-@app.route('/api/login', methods=['POST'])
+@auth.route('/user', methods=['POST'])
 def login():
     """
     User login
@@ -161,7 +121,7 @@ def login():
             examples:
                 application/json:
                     authToken: 5addfaee6d90df1a979119dd34332597
-        403:
+        401:
             description: Wrong credentials
             schema:
                 type: object
@@ -172,19 +132,22 @@ def login():
                         type: string
             examples:
                 application/json:
-                    error: wrong_credentials
+                    error: user_not_authorized
     """
-    email = request.json['email'].lower()
-    password = request.json['password']
-    u = User.query.filter(User.email == email).first()
-    if u is not None:
-        if u.verify_password(password):
-            return serialize(u.token)
+    request_params = request.json
+    if request_params is None:
+        raise BadRequest()
 
-    return Response('{"error":"wrong_credentials"}', 403)
+    email = request_params.get('email')
+    password = request_params.get('password')
+    try:
+        token = UserService(db).authenticate(email, password)
+        return serialize(token)
+    except UserNotAuthorized as e:
+        raise AnarchoApiException(e, 401)
 
 
-@app.route('/api/user', methods=['GET'])
+@auth.route('/user', methods=['GET'])
 @login_required
 def user():
     """
@@ -226,6 +189,6 @@ def user():
                         type: string
             examples:
                 application/json:
-                    error: unauthorized
+                    error: user_not_authorized
     """
     return serialize(g.user)

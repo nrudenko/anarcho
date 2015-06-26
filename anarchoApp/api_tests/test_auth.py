@@ -1,4 +1,5 @@
 import json
+
 from api_tests import AnarchoTestCase
 
 test_user_email = 'test2@mail.com'
@@ -17,7 +18,7 @@ class AuthTest(AnarchoTestCase):
         self.register()
         r = self.register()
         self.assert_status_code(r, 409)
-        self.assert_error_message(r, 'user_already_registered')
+        self.assert_error_message(r, 'user_already_exist')
 
     def test_login(self):
         self.register()
@@ -29,8 +30,8 @@ class AuthTest(AnarchoTestCase):
     def test_login_wrong_credentials(self):
         self.register()
         r = self.login(email='wrong@mail.com')
-        self.assert_status_code(r, 403)
-        self.assert_error_message(r, 'wrong_credentials')
+        self.assert_status_code(r, 401)
+        self.assert_error_message(r, 'user_not_authorized')
 
     def test_get_user(self):
         self.register()
@@ -41,38 +42,38 @@ class AuthTest(AnarchoTestCase):
 
     def test_registration_with_empty_name(self):
         r = self.register(test_user_email, '', test_user_password)
-        self.assert_status_code(r, 403)
-        self.assert_error_message(r, 'user_name_is_empty')
+        self.assert_status_code(r, 400)
+        self.assert_error_message(r, 'username_length_is_wrong')
 
     def test_registration_with_invalid_name_length(self):
         r = self.register(test_user_email, 'testestestestetstetstetstetstetstets', test_user_password)
-        self.assert_status_code(r, 403)
-        self.assert_error_message(r, 'invalid_user_name_length')
+        self.assert_status_code(r, 400)
+        self.assert_error_message(r, 'username_length_is_wrong')
 
     def test_registration_with_empty_email(self):
         r = self.register('', test_user_name, test_user_password)
-        self.assert_status_code(r, 403)
-        self.assert_error_message(r, 'email_is_empty')
+        self.assert_status_code(r, 400)
+        self.assert_error_message(r, 'email_format_is_wrong')
 
     def test_registration_with_invalid_format_email(self):
         r = self.register('asdsd@.com', test_user_name, test_user_password)
-        self.assert_status_code(r, 403)
-        self.assert_error_message(r, 'invalid_email_format')
+        self.assert_status_code(r, 400)
+        self.assert_error_message(r, 'email_format_is_wrong')
 
     def test_registration_with_invalid_email_length(self):
-        r = self.register('qwscvdfg3456ghbsdfdfnmdvcd@cc.com', test_user_name, test_user_password)
-        self.assert_status_code(r, 403)
-        self.assert_error_message(r, 'invalid_email_length')
+        r = self.register('qwerty' * 200 + '@cc.com', test_user_name, test_user_password)
+        self.assert_status_code(r, 400)
+        self.assert_error_message(r, 'email_format_is_wrong')
 
     def test_registration_with_empty_password(self):
         r = self.register(test_user_email, test_user_name, ' ')
-        self.assert_status_code(r, 403)
-        self.assert_error_message(r, 'empty_password')
+        self.assert_status_code(r, 400)
+        self.assert_error_message(r, 'password_is_empty')
 
     def test_registration_with_invalid_password_length(self):
         r = self.register(test_user_email, test_user_name, '123')
-        self.assert_status_code(r, 403)
-        self.assert_error_message(r, 'invalid_password_length')
+        self.assert_status_code(r, 400)
+        self.assert_error_message(r, 'password_is_too_short')
 
     def test_registration_with_insensitive_email(self):
         email = 'TeStEr@MaIl.cOm'

@@ -30,6 +30,14 @@ var api = function ($http, $upload, app_config, Session) {
         return $http(config);
     };
 
+    api.put = function (action, data) {
+        var config = api.getBaseConfig(action);
+        config.headers['Content-Type']='application/json;charset=utf-8';
+        config['method'] = 'PUT';
+        config['data'] = data;
+        return $http(config);
+    };
+
     api.patch = function (action, data) {
         var config = api.getBaseConfig(action);
         config['method'] = 'PATCH';

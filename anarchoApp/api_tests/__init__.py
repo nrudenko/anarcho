@@ -30,6 +30,13 @@ class AnarchoREST(TestCase):
                                 headers=self.headers,
                                 data=json.dumps(params))
 
+    def do_put(self, end_point, params, auth_token=None):
+        self.prepare_headers(auth_token)
+        return self.client.put(end_point,
+                                headers=self.headers,
+                                data=json.dumps(params))
+
+
     def do_delete(self, end_point, params, auth_token=None):
         self.prepare_headers(auth_token)
         return self.client.delete(end_point,
@@ -67,11 +74,11 @@ class AnarchoTestCase(AnarchoREST):
 
     def register(self, email=test_user_email, name=test_user_name, password=test_user_password):
         params = dict(email=email, name=name, password=password)
-        return self.do_post('/api/register', params)
+        return self.do_put('/api/user', params)
 
     def login(self, email=test_user_email, password=test_user_password):
         params = dict(email=email, password=password)
-        r = self.do_post('/api/login', params)
+        r = self.do_post('/api/user', params)
         response_data = json.loads(r.data)
         if 'authToken' in response_data:
             self.token = response_data['authToken']
