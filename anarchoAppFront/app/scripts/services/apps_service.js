@@ -6,7 +6,7 @@ var AppsService = function (Api) {
     };
 
     appService.add = function (app) {
-        return Api.post('apps', app);
+        return Api.put('apps', app);
     };
 
     appService.removeApp = function (appKey) {

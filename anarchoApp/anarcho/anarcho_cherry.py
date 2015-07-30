@@ -2,10 +2,9 @@ import os
 
 import cherrypy
 from cherrypy._cpserver import Server
-from anarcho import app
 
 
-def run():
+def run(app):
     config = {
         'server.socket_host': '0.0.0.0',
         'server.socket_port': app.config['PORT'],

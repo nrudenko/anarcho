@@ -3,7 +3,7 @@ var AuthCtrl = function ($scope, $rootScope, AUTH_EVENTS, AuthService, Session) 
     $scope.login = function (credentials) {
         AuthService.login(credentials)
             .success(function (data) {
-                Session.create(data.authToken);
+                Session.create(data.token);
                 $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
             }).error(function (data) {
                 $scope.error = data.error;
@@ -14,7 +14,7 @@ var AuthCtrl = function ($scope, $rootScope, AUTH_EVENTS, AuthService, Session) 
     $scope.register = function (regData) {
         AuthService.register(regData)
             .success(function (data) {
-                Session.create(data.authToken);
+                Session.create(data.token);
                 $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
             }).error(function (data) {
                 $scope.error = data.error;

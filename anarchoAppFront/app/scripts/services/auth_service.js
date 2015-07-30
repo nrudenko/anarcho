@@ -2,15 +2,15 @@ var AuthService = function (Api) {
     var authService = {};
 
     authService.login = function (credentials) {
-        return Api.post('user', credentials);
+        return Api.post('authorize', credentials);
     };
 
     authService.register = function (reg_data) {
-        return Api.put('user', reg_data)
+        return Api.put('users', reg_data)
     };
 
     authService.getUser = function () {
-        return Api.get('user');
+        return Api.get('users/me');
     };
 
     return authService;

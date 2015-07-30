@@ -1,15 +1,14 @@
 import json
 from unittest import TestCase
+import os
 
 import anarcho
-from anarcho.models.application import Application
-import config_module
-import os
+from anarcho.web import app
 
 
 class AnarchoREST(TestCase):
     def make_client(self):
-        self.client = anarcho.app.test_client()
+        self.client = app.create_app().test_client()
         self.token = None
 
     def prepare_headers(self, auth_token):
@@ -33,9 +32,8 @@ class AnarchoREST(TestCase):
     def do_put(self, end_point, params, auth_token=None):
         self.prepare_headers(auth_token)
         return self.client.put(end_point,
-                                headers=self.headers,
-                                data=json.dumps(params))
-
+                               headers=self.headers,
+                               data=json.dumps(params))
 
     def do_delete(self, end_point, params, auth_token=None):
         self.prepare_headers(auth_token)

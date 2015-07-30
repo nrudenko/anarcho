@@ -1,6 +1,0 @@
-<div ng-controller="AppPluginCtrl"> <p>Bash script for upload:</p> <pre class="text-left">
-#!/bin/bash
-
-build=$1
-curl -i -H "x-auth-token:{{ apiToken }}" -F "file=@$build" {{ host }}/api/apps/{{ appKey }}
-</pre> <p>Using: <code>./anarcho_upload.sh there_is_path_to_build</code></p> </div>
