@@ -6,3 +6,7 @@ anarcho
 Android archives hosting
 
 See https://github.com/nrudenko/anarcho/wiki
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/nrudenko/anarcho/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
